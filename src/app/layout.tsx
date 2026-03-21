@@ -47,12 +47,18 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.__supabase_session = ${JSON.stringify(session ? {
-              access_token: session.access_token,
-              refresh_token: session.refresh_token,
-              expires_at: session.expires_at,
-              user: session.user
-            } : null)};
+              window.__supabase_session = ${session ? JSON.stringify({
+                access_token: session.access_token,
+                refresh_token: session.refresh_token,
+                expires_at: session.expires_at,
+                user: session.user ? {
+                  id: session.user.id,
+                  email: session.user.email,
+                  app_metadata: session.user.app_metadata,
+                  aud: session.user.aud,
+                  created_at: session.user.created_at
+                } : null
+              }) : 'null'};
             `,
           }}
         />
