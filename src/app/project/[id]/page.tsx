@@ -27,6 +27,7 @@ interface CoinGeckoResponse {
     market_cap: {
       usd: number;
     };
+    market_cap_rank: number;
     total_volume: {
       usd: number;
     };
@@ -36,10 +37,49 @@ interface CoinGeckoResponse {
     ath_date: {
       usd: string;
     };
+    fully_diluted_valuation: {
+      usd: number | null;
+    };
+    circulating_supply: number | null;
+    total_supply: number | null;
+    max_supply: number | null;
   };
+  genesis_date: string | null;
   links: {
     homepage: string[];
     blockchain_site: string[];
+  };
+}
+
+// LamboMoon curation data - hardcoded for now
+const lamboMoonData: Record<string, { whyItCouldMoon: string; riskLevel: "Low" | "Medium" | "High" }> = {
+  bitcoin: {
+    whyItCouldMoon: "Digital gold narrative, institutional adoption growing",
+    riskLevel: "Low",
+  },
+  ethereum: {
+    whyItCouldMoon: "DeFi ecosystem dominance, ETF inflows",
+    riskLevel: "Medium",
+  },
+  solana: {
+    whyItCouldMoon: "High-speed, low-cost transactions, meme coin boom",
+    riskLevel: "High",
+  },
+  dogecoin: {
+    whyItCouldMoon: "Elon tweets, community strength",
+    riskLevel: "High",
+  },
+  "shiba-inu": {
+    whyItCouldMoon: "Massive holder base, token burns",
+    riskLevel: "High",
+  },
+};
+
+// Get LamboMoon curation data for a coin
+function getLamboMoonData(coinId: string) {
+  return lamboMoonData[coinId] || {
+    whyItCouldMoon: "Undervalued gem with strong community potential",
+    riskLevel: "Medium" as const,
   };
 }
 
