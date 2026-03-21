@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import PriceTicker from "@/components/PriceTicker";
 
-// Seed projects data
+// Seed projects data with CoinGecko IDs
 const seedProjects = [
-  { name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change: "+12.4%" },
-  { name: "Pi Network", symbol: "PI", category: "Infrastructure", description: "Mobile mining cryptocurrency", change: "+5.2%" },
-  { name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance decentralized exchange", change: "+8.7%" },
-  { name: "Ether.fi", symbol: "ETHFI", category: "LSD", description: "Liquid staking protocol", change: "+3.1%" },
-  { name: "Pudgy Penguins", symbol: "PENGU", category: "NFT", description: "NFT collection and IP brand", change: "+15.8%" },
-  { name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "AI blockchain infrastructure", change: "+9.3%" },
+  { id: "bittensor", name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change: "+12.4%" },
+  { id: "hyperliquid", name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance decentralized exchange", change: "+8.7%" },
+  { id: "ether-fi", name: "Ether.fi", symbol: "ETHFI", category: "LSD", description: "Liquid staking protocol", change: "+3.1%" },
+  { id: "pudgy-penguins", name: "Pudgy Penguins", symbol: "PENGU", category: "NFT", description: "NFT collection and IP brand", change: "+15.8%" },
+  { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "AI blockchain infrastructure", change: "+9.3%" },
+  { id: "solana", name: "Solana", symbol: "SOL", category: "L1", description: "High-performance blockchain", change: "+4.2%" },
 ];
 
 const categories = [
@@ -232,7 +233,9 @@ export default function Home() {
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90">View Details</Button>
+                    <Link href={`/project/${project.id}`} className="flex-1">
+                      <Button size="sm" className="w-full bg-primary hover:bg-primary/90">View Details</Button>
+                    </Link>
                     <Button size="sm" variant="outline">🔖</Button>
                   </div>
                 </CardContent>
