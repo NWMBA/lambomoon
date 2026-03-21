@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import PriceTicker from "@/components/PriceTicker";
 
 // Seed projects data
 const seedProjects = [
@@ -106,6 +107,9 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Crypto Price Ticker */}
+      <PriceTicker />
 
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
