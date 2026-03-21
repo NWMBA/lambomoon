@@ -234,9 +234,39 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const { price_change_percentage_24h, current_price, market_cap, total_volume, ath, ath_date } = coinData.market_data;
+  const { 
+    price_change_percentage_24h, 
+    current_price, 
+    market_cap, 
+    total_volume, 
+    ath, 
+    ath_date,
+    fully_diluted_valuation,
+    circulating_supply,
+    total_supply,
+    max_supply,
+    market_cap_rank
+  } = coinData.market_data;
   const changeColor = price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400";
   const changeIcon = price_change_percentage_24h >= 0 ? "📈" : "📉";
+
+  const lamboData = getLamboMoonData(coinData.id);
+  const launchDate = coinData.genesis_date;
+
+  // Calculate age
+  const getAge = () => {
+    if (!launchDate) return "Unknown";
+    const genesis = new Date(launchDate);
+    const now = new Date();
+    const years = now.getFullYear() - genesis.getFullYear();
+    const months = now.getMonth() - genesis.getMonth();
+    const totalMonths = years * 12 + months;
+    if (totalMonths < 1) return "Just launched!";
+    if (totalMonths < 12) return `${totalMonths} month${totalMonths > 1 ? 's' : ''}`;
+    const y = Math.floor(totalMonths / 12);
+    const m = totalMonths % 12;
+    return `${y}y ${m}m`;
+  };
 
   return (
     <div className="min-h-screen">
@@ -310,6 +340,85 @@ export default function ProjectDetailPage() {
             <CardContent>
               <div className="text-2xl font-bold">{formatPrice(ath.usd)}</div>
               <div className="text-xs text-muted-foreground">{formatDate(ath_date.usd)}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Market Cap Rank</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">#{market_cap_rank}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">FDV</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{fully_diluted_valuation?.usd ? formatNumber(fully_diluted_valuation.usd) : "N/A"}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Launch Date</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{launchDate ? new Date(launchDate).toLocaleDateString() : "Unknown"}</div>
+              <div className="text-xs text-muted-foreground">{getAge()}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Circulating Supply</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{circulating_supply ? formatNumber(circulating_supply) : "N/A"}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Total Supply</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{total_supply ? formatNumber(total_supply) : "N/A"}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Max Supply</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{max_supply ? formatNumber(max_supply) : "Unlimited"}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Why It Could Moon 🚀</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-medium text-amber-400">{lamboData?.whyItCouldMoon || "High potential based on market trends"}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground font-normal">Risk Level</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                lamboData?.riskLevel === 'Low' ? 'bg-green-500/20 text-green-400' :
+                lamboData?.riskLevel === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                'bg-red-500/20 text-red-400'
+              }`}>
+                {lamboData?.riskLevel || "High"} Risk
+              </span>
             </CardContent>
           </Card>
         </div>
