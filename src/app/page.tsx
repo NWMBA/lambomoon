@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import PriceTicker from "@/components/PriceTicker";
 import { TrendingAlpha } from "@/components/TrendingAlpha";
+import { BiggestMovers } from "@/components/BiggestMovers";
 
 // Seed projects data with CoinGecko IDs - 30 projects launched late 2025/early 2026
 type Project = {
@@ -294,12 +295,15 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Biggest Movers Section */}
+      <BiggestMovers limit={6} />
+
       {/* Projects Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-bold text-foreground">
-              {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "🔥 Trending Projects"}
+              {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "📈 Biggest Movers"}
             </h3>
             <div className="flex gap-2">
               <Button
