@@ -298,6 +298,9 @@ export default function Home() {
       {/* Biggest Movers Section */}
       <BiggestMovers limit={6} />
 
+      {/* Trending Alpha Section */}
+      <TrendingAlpha />
+
       {/* Projects Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -398,9 +401,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Trending Alpha Section */}
-      <TrendingAlpha />
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-8 mt-12">
