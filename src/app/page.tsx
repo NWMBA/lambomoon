@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import PriceTicker from "@/components/PriceTicker";
+import { TrendingAlpha } from "@/components/TrendingAlpha";
 
 // Seed projects data with CoinGecko IDs - 30 projects launched late 2025/early 2026
 type Project = {
@@ -393,6 +394,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Trending Alpha Section */}
+      <TrendingAlpha />
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-8 mt-12">
