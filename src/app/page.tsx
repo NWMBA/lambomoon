@@ -84,6 +84,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'top'>('trending');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [projects, setProjects] = useState(seedProjects);
@@ -274,10 +275,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Category Pills */}
-      <section className="py-8 border-y border-border/30 bg-card/30">
+      {/* Biggest Movers Section */}
+      <BiggestMovers limit={6} />
+
+      {/* Trending Alpha Section */}
+      <TrendingAlpha />
+
+      {/* Projects Grid */}
+      <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-2">
+          {/* Category Pills */}
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -292,23 +300,28 @@ export default function Home() {
               </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Biggest Movers Section */}
-      <BiggestMovers limit={6} />
-
-      {/* Trending Alpha Section */}
-      <TrendingAlpha />
-
-      {/* Projects Grid */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-bold text-foreground">
-              {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "📈 Biggest Movers"}
+              {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "Browse Cryptos"}
             </h3>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className={viewMode === 'cards' ? 'bg-primary' : 'border-border'}
+              >
+                Cards
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className={viewMode === 'table' ? 'bg-primary' : 'border-border'}
+              >
+                Table
+              </Button>
               <Button
                 variant={sortBy === "trending" ? "default" : "outline"}
                 size="sm"
@@ -336,6 +349,7 @@ export default function Home() {
             </div>
           </div>
 
+          {viewMode === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedProjects.map((project, index) => (
               <Card key={project.symbol} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer">
@@ -376,6 +390,51 @@ export default function Home() {
               </Card>
             ))}
           </div>
+          ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Name</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Symbol</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Category</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">Price</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">24h Change</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">Market Cap</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedProjects.map((project, index) => (
+                  <tr key={project.symbol} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground text-sm">{index + 1}</span>
+                        <span className="font-medium">{project.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-primary">{project.symbol}</td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-1 text-xs rounded-full bg-secondary">{project.category}</span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium">${project.current_price?.toFixed(2) || '0.00'}</td>
+                    <td className={`py-3 px-4 text-right font-medium ${project.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {project.change_24h >= 0 ? '+' : ''}{project.change_24h?.toFixed(1) || '0.0'}%
+                    </td>
+                    <td className="py-3 px-4 text-right text-muted-foreground">
+                      ${((project.current_price || 0) * 1000000).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Link href={`/project/${project.id}`}>
+                        <Button size="sm" className="bg-primary hover:bg-primary/90">View</Button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          )}
 
           {filteredProjects.length === 0 && (
             <div className="text-center py-12">
