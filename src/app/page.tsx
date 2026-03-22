@@ -8,7 +8,19 @@ import { Input } from "@/components/ui/input";
 import PriceTicker from "@/components/PriceTicker";
 
 // Seed projects data with CoinGecko IDs - 30 projects launched late 2025/early 2026
-const seedProjects = [
+type Project = {
+  id: string;
+  name: string;
+  symbol: string;
+  category: string;
+  description: string;
+  change_24h: number;
+  launch_date: string;
+  upvotes: number;
+  current_price?: number;
+};
+
+const seedProjects: Project[] = [
   // AI & Agents
   { id: "virtual-protocol", name: "Virtual Protocol", symbol: "VIRTUAL", category: "AI/Agents", description: "AI agent infrastructure platform", change_24h: 5.2, launch_date: "2025-12-15", upvotes: 420 },
   { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "Decentralized AI infrastructure", change_24h: 3.8, launch_date: "2025-11-20", upvotes: 380 },
