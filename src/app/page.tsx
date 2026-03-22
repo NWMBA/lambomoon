@@ -13,8 +13,8 @@ const seedProjects = [
   { id: "virtual-protocol", name: "Virtual Protocol", symbol: "VIRTUAL", category: "AI/Agents", description: "AI agent infrastructure platform", change_24h: 5.2, launch_date: "2025-12-15", upvotes: 420 },
   { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "Decentralized AI infrastructure", change_24h: 3.8, launch_date: "2025-11-20", upvotes: 380 },
   { id: "bittensor", name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change_24h: 7.1, launch_date: "2025-10-15", upvotes: 520 },
-  { id: "ocean", name: "Ocean Protocol", symbol: "OCEAN", category: "AI/DePIN", description: "Data marketplace for AI", change_24h: 2.4, launch_date: "2025-09-10", upvotes: 210 },
-  { id: "render", name: "Render Network", symbol: "RNDR", category: "AI/DePIN", description: "GPU rendering & AI compute", change_24h: 4.5, launch_date: "2025-09-01", upvotes: 340 },
+  { id: "ocean-protocol", name: "Ocean Protocol", symbol: "OCEAN", category: "AI/DePIN", description: "Data marketplace for AI", change_24h: 2.4, launch_date: "2025-09-10", upvotes: 210 },
+  { id: "render-token", name: "Render Network", symbol: "RNDR", category: "AI/DePIN", description: "GPU rendering & AI compute", change_24h: 4.5, launch_date: "2025-09-01", upvotes: 340 },
   
   // DePIN & Infrastructure
   { id: "akash", name: "Akash Network", symbol: "AKT", category: "DePIN", description: "Decentralized cloud computing", change_24h: 6.3, launch_date: "2025-11-05", upvotes: 290 },
