@@ -7,14 +7,48 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import PriceTicker from "@/components/PriceTicker";
 
-// Seed projects data with CoinGecko IDs
+// Seed projects data with CoinGecko IDs - 30 projects launched late 2025/early 2026
 const seedProjects = [
-  { id: "bittensor", name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change_24h: 12.4, launch_date: "2026-03-20", upvotes: 450 },
-  { id: "hyperliquid", name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance decentralized exchange", change_24h: 8.7, launch_date: "2026-03-21", upvotes: 320 },
-  { id: "ether-fi", name: "Ether.fi", symbol: "ETHFI", category: "LSD", description: "Liquid staking protocol", change_24h: 3.1, launch_date: "2026-03-15", upvotes: 180 },
-  { id: "pudgy-penguins", name: "Pudgy Penguins", symbol: "PENGU", category: "NFT", description: "NFT collection and IP brand", change_24h: 15.8, launch_date: "2026-03-18", upvotes: 890 },
-  { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "AI blockchain infrastructure", change_24h: 9.3, launch_date: "2026-03-19", upvotes: 275 },
-  { id: "solana", name: "Solana", symbol: "SOL", category: "L1", description: "High-performance blockchain", change_24h: 4.2, launch_date: "2026-03-10", upvotes: 620 },
+  // AI & Agents
+  { id: "virtual-protocol", name: "Virtual Protocol", symbol: "VIRTUAL", category: "AI/Agents", description: "AI agent infrastructure platform", change_24h: 5.2, launch_date: "2025-12-15", upvotes: 420 },
+  { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "Decentralized AI infrastructure", change_24h: 3.8, launch_date: "2025-11-20", upvotes: 380 },
+  { id: "bittensor", name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change_24h: 7.1, launch_date: "2025-10-15", upvotes: 520 },
+  { id: "ocean-protocol", name: "Ocean Protocol", symbol: "OCEAN", category: "AI/DePIN", description: "Data marketplace for AI", change_24h: 2.4, launch_date: "2025-09-10", upvotes: 210 },
+  { id: "render-network", name: "Render Network", symbol: "RNDR", category: "AI/DePIN", description: "GPU rendering & AI compute", change_4h: 4.5, launch_date: "2025-09-01", upvotes: 340 },
+  
+  // DePIN & Infrastructure
+  { id: "akash-network", name: "Akash Network", symbol: "AKT", category: "DePIN", description: "Decentralized cloud computing", change_24h: 6.3, launch_date: "2025-11-05", upvotes: 290 },
+  { id: "io-net", name: "io.net", symbol: "IO", category: "DePIN", description: "AI compute network", change_24h: 8.9, launch_date: "2025-12-01", upvotes: 410 },
+  { id: "arweave", name: "Arweave", symbol: "AR", category: "Infrastructure", description: "Permanent data storage", change_24h: 1.2, launch_date: "2025-08-20", upvotes: 180 },
+  { id: "filecoin", name: "Filecoin", symbol: "FIL", category: "Infrastructure", description: "Decentralized storage", change_24h: -0.8, launch_date: "2025-08-15", upvotes: 150 },
+  { id: "ipfs", name: "IPFS", symbol: "IPFS", category: "Infrastructure", description: "InterPlanetary File System", change_24h: 0.5, launch_date: "2025-07-01", upvotes: 95 },
+  
+  // DeFi & Exchanges  
+  { id: "hyperliquid", name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance DEX", change_24h: 4.2, launch_date: "2025-11-25", upvotes: 480 },
+  { id: "ether-fi", name: "Ether.fi", symbol: "ETHFI", category: "DeFi", description: "Liquid staking protocol", change_24h: 2.1, launch_date: "2025-09-15", upvotes: 230 },
+  { id: "eigenlayer", name: "EigenLayer", symbol: "EIGEN", category: "DeFi", description: "Restaking infrastructure", change_24h: 3.5, launch_date: "2025-10-01", upvotes: 390 },
+  { id: "pendle", name: "Pendle", symbol: "PENDLE", category: "DeFi", description: "Yield trading protocol", change_24h: 1.8, launch_date: "2025-09-20", upvotes: 165 },
+  { id: "aave", name: "Aave", symbol: "AAVE", category: "DeFi", description: "Lending protocol", change_24h: 2.3, launch_date: "2025-10-10", upvotes: 145 },
+  
+  // L1/L2
+  { id: "solana", name: "Solana", symbol: "SOL", category: "L1", description: "High-performance blockchain", change_24h: 3.1, launch_date: "2025-07-20", upvotes: 520 },
+  { id: "sui", name: "Sui", symbol: "SUI", category: "L1", description: "Object-centric blockchain", change_24h: 5.8, launch_date: "2025-08-05", upvotes: 380 },
+  { id: "sei", name: "Sei", symbol: "SEI", category: "L1", description: "Parallelized L1", change_24h: 4.2, launch_date: "2025-09-25", upvotes: 290 },
+  { id: "near", name: "NEAR Protocol", symbol: "NEAR", category: "L1", description: "User-friendly blockchain", change_24h: 2.7, launch_date: "2025-07-15", upvotes: 340 },
+  { id: "internet-computer", name: "Internet Computer", symbol: "ICP", category: "L1", description: "Decentralized cloud", change_24h: 1.5, launch_date: "2025-08-10", upvotes: 180 },
+  { id: "polygon", name: "Polygon", symbol: "POL", category: "L2", description: "Ethereum scaling", change_24h: 0.9, launch_date: "2025-09-01", upvotes: 210 },
+  { id: "arbitrum", name: "Arbitrum", symbol: "ARB", category: "L2", description: "Ethereum L2", change_24h: 1.2, launch_date: "2025-08-25", upvotes: 175 },
+  { id: "optimism", name: "Optimism", symbol: "OP", category: "L2", description: "Ethereum L2", change_24h: 0.8, launch_date: "2025-08-15", upvotes: 155 },
+  
+  // Memes & NFT
+  { id: "pudgy-penguins", name: "Pudgy Penguins", symbol: "PENGU", category: "NFT", description: "NFT collection & IP brand", change_24h: 8.5, launch_date: "2025-12-10", upvotes: 620 },
+  { id: "pepe", name: "Pepe", symbol: "PEPE", category: "Meme", description: "Meme coin", change_24h: 12.3, launch_date: "2025-11-01", upvotes: 580 },
+  { id: "dogecoin", name: "Dogecoin", symbol: "DOGE", category: "Meme", description: "Original meme coin", change_24h: 2.1, launch_date: "2025-07-10", upvotes: 420 },
+  { id: "bonk", name: "Bonk", symbol: "BONK", category: "Meme", description: "Solana meme coin", change_24h: 5.7, launch_date: "2025-10-20", upvotes: 310 },
+  
+  // RWA
+  { id: "polymesh", name: "Polymesh", symbol: "POLYX", category: "RWA", description: "Securities blockchain", change_24h: 0.4, launch_date: "2025-09-05", upvotes: 85 },
+  { id: "centrifuge", name: "Centrifuge", symbol: "CFG", category: "RWA", description: "Real-world asset DeFi", change_24h: 1.1, launch_date: "2025-08-15", upvotes: 65 },
 ];
 
 const categories = [
@@ -28,6 +62,9 @@ const howItWorks = [
   { step: 4, title: "Moon", description: "Watch your discoveries take off to the moon! 🚀", icon: "🌕" },
 ];
 
+// CoinGecko API - free tier: 10-30 calls/minute
+const COINGECKO_API = "https://api.coingecko.com/api/v3";
+
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +72,8 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'top'>('trending');
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [projects, setProjects] = useState(seedProjects);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const audio = new Audio("/LamboMoon-IMT.mp3");
@@ -57,7 +96,42 @@ export default function Home() {
     }
   };
 
-  const filteredProjects = seedProjects
+  // Fetch live prices from CoinGecko
+  useEffect(() => {
+    const fetchLivePrices = async () => {
+      try {
+        const ids = seedProjects.map(p => p.id).join(",");
+        const response = await fetch(
+          `${COINGECKO_API}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&sparkline=false`
+        );
+        
+        if (!response.ok) throw new Error("Failed to fetch");
+        
+        const data = await response.json();
+        
+        // Update projects with live data
+        const updated = seedProjects.map(project => ({
+          ...project,
+          current_price: data[project.id]?.usd || 0,
+          change_24h: data[project.id]?.usd_24h_change || 0,
+        }));
+        
+        setProjects(updated);
+      } catch (err) {
+        console.error("Price fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLivePrices();
+    
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchLivePrices, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredProjects = projects
     .filter((project) => {
       const matchesSearch = 
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
