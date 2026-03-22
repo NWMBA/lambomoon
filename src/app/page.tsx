@@ -9,12 +9,12 @@ import PriceTicker from "@/components/PriceTicker";
 
 // Seed projects data with CoinGecko IDs
 const seedProjects = [
-  { id: "bittensor", name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change: "+12.4%" },
-  { id: "hyperliquid", name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance decentralized exchange", change: "+8.7%" },
-  { id: "ether-fi", name: "Ether.fi", symbol: "ETHFI", category: "LSD", description: "Liquid staking protocol", change: "+3.1%" },
-  { id: "pudgy-penguins", name: "Pudgy Penguins", symbol: "PENGU", category: "NFT", description: "NFT collection and IP brand", change: "+15.8%" },
-  { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "AI blockchain infrastructure", change: "+9.3%" },
-  { id: "solana", name: "Solana", symbol: "SOL", category: "L1", description: "High-performance blockchain", change: "+4.2%" },
+  { id: "bittensor", name: "Bittensor", symbol: "TAO", category: "AI/DePIN", description: "Decentralized machine learning network", change_24h: 12.4, launch_date: "2026-03-20", upvotes: 450 },
+  { id: "hyperliquid", name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance decentralized exchange", change_24h: 8.7, launch_date: "2026-03-21", upvotes: 320 },
+  { id: "ether-fi", name: "Ether.fi", symbol: "ETHFI", category: "LSD", description: "Liquid staking protocol", change_24h: 3.1, launch_date: "2026-03-15", upvotes: 180 },
+  { id: "pudgy-penguins", name: "Pudgy Penguins", symbol: "PENGU", category: "NFT", description: "NFT collection and IP brand", change_24h: 15.8, launch_date: "2026-03-18", upvotes: 890 },
+  { id: "fetch-ai", name: "Artificial Superintelligence Alliance", symbol: "FET", category: "AI/Agents", description: "AI blockchain infrastructure", change_24h: 9.3, launch_date: "2026-03-19", upvotes: 275 },
+  { id: "solana", name: "Solana", symbol: "SOL", category: "L1", description: "High-performance blockchain", change_24h: 4.2, launch_date: "2026-03-10", upvotes: 620 },
 ];
 
 const categories = [
@@ -32,6 +32,7 @@ export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'top'>('trending');
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
 
@@ -56,12 +57,19 @@ export default function Home() {
     }
   };
 
-  const filteredProjects = seedProjects.filter((project) => {
-    const matchesSearch = 
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.symbol.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || project.category.includes(selectedCategory);
-    return matchesSearch && matchesCategory;
+  const filteredProjects = seedProjects
+    .filter((project) => {
+      const matchesSearch = 
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "All" || project.category.includes(selectedCategory);
+      return matchesSearch && matchesCategory;
+    });
+
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (sortBy === 'newest') return new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime()
+    if (sortBy === 'top') return b.upvotes - a.upvotes
+    return b.change_24h - a.change_24h // trending
   });
 
   return (
@@ -103,8 +111,12 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="border-border hover:bg-secondary">Sign In</Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">Get Started</Button>
+            <Link href="/login">
+              <Button variant="outline" size="sm" className="border-border hover:bg-secondary">Sign In</Button>
+            </Link>
+            <Link href="/submit">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">Get Started</Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -206,11 +218,36 @@ export default function Home() {
             <h3 className="text-3xl font-bold text-foreground">
               {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "🔥 Trending Projects"}
             </h3>
-            <Button variant="outline" className="border-border hover:bg-secondary">View All</Button>
+            <div className="flex gap-2">
+              <Button
+                variant={sortBy === "trending" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("trending")}
+                className={sortBy === "trending" ? "bg-primary" : "border-border"}
+              >
+                🔥 Trending
+              </Button>
+              <Button
+                variant={sortBy === "newest" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("newest")}
+                className={sortBy === "newest" ? "bg-primary" : "border-border"}
+              >
+                ✨ Newest
+              </Button>
+              <Button
+                variant={sortBy === "top" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("top")}
+                className={sortBy === "top" ? "bg-primary" : "border-border"}
+              >
+                ⬆️ Top
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project, index) => (
+            {sortedProjects.map((project, index) => (
               <Card key={project.symbol} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -229,7 +266,7 @@ export default function Home() {
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">{project.category}</span>
-                    <span className="text-sm text-green-400 font-medium">{project.change}</span>
+                    <span className="text-sm text-green-400 font-medium">+{project.change_24h}%</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
                   <div className="flex gap-2">
