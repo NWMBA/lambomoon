@@ -349,7 +349,6 @@ export default function Home() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">{project.category}</span>
-                      <span className="text-xs text-muted-foreground">Launched {new Date(project.launch_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">${project.current_price?.toFixed(2) || '0.00'}</span>
