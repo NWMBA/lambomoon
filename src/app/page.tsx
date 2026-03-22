@@ -108,24 +108,20 @@ export default function Home() {
     }
   };
 
-  // Fetch live prices from CoinGecko
+  // Fetch live prices from our API (cached via Vercel)
   useEffect(() => {
     const fetchLivePrices = async () => {
       try {
-        const ids = seedProjects.map(p => p.id).join(",");
-        const response = await fetch(
-          `${COINGECKO_API}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&sparkline=false`
-        );
-        
+        const response = await fetch("/api/prices");
         if (!response.ok) throw new Error("Failed to fetch");
         
-        const data = await response.json();
+        const { prices } = await response.json();
         
         // Update projects with live data
         const updated = seedProjects.map(project => ({
           ...project,
-          current_price: data[project.id]?.usd || 0,
-          change_24h: data[project.id]?.usd_24h_change || 0,
+          current_price: prices[project.id]?.usd || 0,
+          change_24h: prices[project.id]?.usd_24h_change || 0,
         }));
         
         setProjects(updated);
