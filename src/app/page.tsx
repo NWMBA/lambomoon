@@ -35,7 +35,7 @@ const seedProjects: Project[] = [
   { id: "io", name: "io.net", symbol: "IO", category: "DePIN", description: "AI compute network", change_24h: 8.9, launch_date: "2025-12-01", upvotes: 410 },
   { id: "arweave", name: "Arweave", symbol: "AR", category: "Infrastructure", description: "Permanent data storage", change_24h: 1.2, launch_date: "2025-08-20", upvotes: 180 },
   { id: "filecoin", name: "Filecoin", symbol: "FIL", category: "Infrastructure", description: "Decentralized storage", change_24h: -0.8, launch_date: "2025-08-15", upvotes: 150 },
-  { id: "ipfs", name: "IPFS", symbol: "IPFS", category: "Infrastructure", description: "InterPlanetary File System", change_24h: 0.5, launch_date: "2025-07-01", upvotes: 95 },
+  { id: "filecoin", name: "IPFS", symbol: "IPFS", category: "Infrastructure", description: "InterPlanetary File System", change_24h: 0.5, launch_date: "2025-07-01", upvotes: 95 },
   
   // DeFi & Exchanges  
   { id: "hyperliquid", name: "Hyperliquid", symbol: "HYPE", category: "DeFi", description: "High-performance DEX", change_24h: 4.2, launch_date: "2025-11-25", upvotes: 480 },
@@ -47,10 +47,10 @@ const seedProjects: Project[] = [
   // L1/L2
   { id: "solana", name: "Solana", symbol: "SOL", category: "L1", description: "High-performance blockchain", change_24h: 3.1, launch_date: "2025-07-20", upvotes: 520 },
   { id: "sui", name: "Sui", symbol: "SUI", category: "L1", description: "Object-centric blockchain", change_24h: 5.8, launch_date: "2025-08-05", upvotes: 380 },
-  { id: "sei", name: "Sei", symbol: "SEI", category: "L1", description: "Parallelized L1", change_24h: 4.2, launch_date: "2025-09-25", upvotes: 290 },
+  { id: "sei-network", name: "Sei", symbol: "SEI", category: "L1", description: "Parallelized L1", change_24h: 4.2, launch_date: "2025-09-25", upvotes: 290 },
   { id: "near", name: "NEAR Protocol", symbol: "NEAR", category: "L1", description: "User-friendly blockchain", change_24h: 2.7, launch_date: "2025-07-15", upvotes: 340 },
   { id: "internet-computer", name: "Internet Computer", symbol: "ICP", category: "L1", description: "Decentralized cloud", change_24h: 1.5, launch_date: "2025-08-10", upvotes: 180 },
-  { id: "polygon", name: "Polygon", symbol: "POL", category: "L2", description: "Ethereum scaling", change_24h: 0.9, launch_date: "2025-09-01", upvotes: 210 },
+  { id: "matic-network", name: "Polygon", symbol: "POL", category: "L2", description: "Ethereum scaling", change_24h: 0.9, launch_date: "2025-09-01", upvotes: 210 },
   { id: "arbitrum", name: "Arbitrum", symbol: "ARB", category: "L2", description: "Ethereum L2", change_24h: 1.2, launch_date: "2025-08-25", upvotes: 175 },
   { id: "optimism", name: "Optimism", symbol: "OP", category: "L2", description: "Ethereum L2", change_24h: 0.8, launch_date: "2025-08-15", upvotes: 155 },
   
@@ -84,7 +84,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'top'>('trending');
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [projects, setProjects] = useState(seedProjects);

@@ -5,10 +5,10 @@ const COINGECKO_API = "https://api.coingecko.com/api/v3";
 // CoinGecko IDs - these should match seedProjects in page.tsx
 const COIN_IDS = [
   "virtual-protocol", "fetch-ai", "bittensor", "ocean-protocol", "render-token",
-  "akash", "io", "arweave", "filecoin", "ipfs",
+  "akash", "io", "arweave", "filecoin", "filecoin",
   "hyperliquid", "ether-fi", "eigenlayer", "pendle", "aave",
-  "solana", "sui", "sei", "near", "internet-computer",
-  "polygon", "arbitrum", "optimism",
+  "solana", "sui", "sei-network", "near", "internet-computer",
+  "matic-network", "arbitrum", "optimism",
   "pudgy-penguins", "pepe", "dogecoin", "bonk",
   "polymesh", "centrifuge"
 ];
