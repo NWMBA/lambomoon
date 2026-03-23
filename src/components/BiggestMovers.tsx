@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -57,9 +58,10 @@ function MoverCard({ mover, rank }: { mover: Mover; rank: number }) {
   const isPositive = mover.change_24h >= 0;
 
   return (
-    <div
+    <Link
+      href={`/project/${mover.id}`}
       data-testid="mover-card"
-      className="bg-[#1a1a2e] border border-[#2d2d4a] rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
+      className="block bg-[#1a1a2e] border border-[#2d2d4a] rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
     >
       <div className="flex items-center justify-between mb-3">
         <div
@@ -87,7 +89,7 @@ function MoverCard({ mover, rank }: { mover: Mover; rank: number }) {
           {formatChange(mover.change_24h)}
         </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -156,12 +158,12 @@ export function BiggestMovers({ limit = 6, showViewAll = true }: BiggestMoversPr
       {/* View All Link */}
       {showViewAll && !loading && (
         <div className="text-center mt-10">
-          <a
+          <Link
             href="/movers"
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium"
           >
             View All <ArrowRight className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
       )}
     </section>

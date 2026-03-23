@@ -189,10 +189,32 @@ export default function Home() {
           </div>
           
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">Trending</Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">New</Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">Categories</Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">About</Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`${sortBy === 'trending' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
+              onClick={() => setSortBy('trending')}
+            >
+              Trending
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`${sortBy === 'newest' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
+              onClick={() => setSortBy('newest')}
+            >
+              New
+            </Button>
+            <Link href="/#categories">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                Categories
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                About
+              </Button>
+            </Link>
           </div>
 
           <div className="flex items-center gap-2">
@@ -282,7 +304,7 @@ export default function Home() {
       <TrendingAlpha />
 
       {/* Projects Grid */}
-      <section className="py-16">
+      <section id="categories" className="py-16">
         <div className="container mx-auto px-4">
           {/* Category Pills */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">

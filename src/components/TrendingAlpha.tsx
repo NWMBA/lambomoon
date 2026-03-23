@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Heart, TrendingUp, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -142,7 +143,9 @@ function AlphaCard({ project, rank }: { project: Project; rank: number }) {
   const [upvotes, setUpvotes] = useState(project.upvotes);
   const [hasUpvoted, setHasUpvoted] = useState(false);
 
-  const handleUpvote = () => {
+  const handleUpvote = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (hasUpvoted) {
       setUpvotes(prev => prev - 1);
     } else {
@@ -154,9 +157,10 @@ function AlphaCard({ project, rank }: { project: Project; rank: number }) {
   const isPositive = project.change_24h >= 0;
 
   return (
-    <div
+    <Link
+      href={`/project/${project.id}`}
       data-testid="alpha-card"
-      className="group bg-[#1a1a2e] border border-[#2d2d4a] rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#ff6b35]/50 hover:shadow-lg hover:shadow-[#ff6b35]/10"
+      className="block bg-[#1a1a2e] border border-[#2d2d4a] rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#ff6b35]/50 hover:shadow-lg hover:shadow-[#ff6b35]/10"
     >
       {/* Rank Badge */}
       <div className="flex items-start justify-between mb-3">
@@ -206,7 +210,7 @@ function AlphaCard({ project, rank }: { project: Project; rank: number }) {
         <Heart className={cn('w-4 h-4', hasUpvoted && 'fill-current')} />
         <span>{upvotes.toLocaleString()}</span>
       </button>
-    </div>
+    </Link>
   );
 }
 
@@ -270,12 +274,12 @@ export function TrendingAlpha({ limit = 6, showViewAll = true }: TrendingAlphaPr
       {/* View All Link */}
       {showViewAll && !loading && (
         <div className="text-center mt-10">
-          <a
+          <Link
             href="/trending"
             className="inline-flex items-center gap-2 text-[#ff6b35] hover:text-[#ff6b35]/80 transition-colors font-medium"
           >
             View All <ArrowRight className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
       )}
     </section>
