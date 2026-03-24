@@ -1,40 +1,9 @@
-# LamboMoon Project Status
+-- LamboMoon Database Schema
+-- Run this in Supabase SQL Editor
 
-**Last updated:** 2026-03-23 17:03
+-- Enable UUID extension (if not already enabled)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-## Current Status
-
-✅ **DEPLOYED** - https://lambomoon.io
-
-### Completed Features
-- Landing page with sorting (Trending/Newest/Most Upvoted)
-- Category filters
-- Project detail pages with CoinGecko data
-- Track button on detail pages
-- `/movers` - biggest movers table
-- `/trending` - trending projects
-- `/about` - about page
-- `/submit` - submit project page
-- `/profile` - user profile editor
-- `/dashboard` - tracked cryptos & votes
-- Supabase auth integration
-
-### In Progress
-- Database schema - tables partially exist (profiles table already created)
-
-### Next Steps
-1. Run ALTER script to add missing columns to existing tables
-2. Test auth flow
-
----
-
-## Database Status
-
-⚠️ **Issue:** Running migration gave error "relation profiles already exists"
-
-**Solution:** Run this ALTER script instead (adds missing columns to existing tables):
-
-```sql
 -- Add columns to existing profiles table
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
@@ -57,15 +26,15 @@ CREATE TABLE IF NOT EXISTS cryptos (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create tracked_cryptos table
+-- Create tracked_cryptos table (uses coingecko_id for simplicity)
 CREATE TABLE IF NOT EXISTS tracked_cryptos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-    crypto_id UUID REFERENCES cryptos(id) ON DELETE CASCADE,
+    coingecko_id TEXT NOT NULL,
     entry_price NUMERIC,
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, crypto_id)
+    UNIQUE(user_id, coingecko_id)
 );
 
 -- Create crypto_votes table
@@ -78,7 +47,7 @@ CREATE TABLE IF NOT EXISTS crypto_votes (
     UNIQUE(crypto_id, user_id)
 );
 
--- Enable RLS
+-- Enable RLS on new tables
 ALTER TABLE cryptos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tracked_cryptos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_votes ENABLE ROW LEVEL SECURITY;
@@ -87,28 +56,3 @@ ALTER TABLE crypto_votes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can read cryptos" ON cryptos FOR SELECT USING (true);
 CREATE POLICY "Users manage own tracked" ON tracked_cryptos FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users manage own votes" ON crypto_votes FOR ALL USING (auth.uid() = user_id);
-```
-
----
-
-## Routes
-
-| Route | Status |
-|-------|--------|
-| / | ✅ Static |
-| /about | ✅ Static |
-| /movers | ✅ Static |
-| /trending | ✅ Static |
-| /submit | ✅ Dynamic |
-| /profile | ✅ Static |
-| /dashboard | ✅ Static |
-| /project/[id] | ✅ Dynamic |
-| /login | ✅ Static |
-
----
-
-## Files Created This Session
-
-- `src/app/profile/page.tsx` - Profile editor
-- `src/app/dashboard/page.tsx` - User dashboard
-- `supabase/migrations/001_initial_schema.sql` - Full schema (use ALTER version above)

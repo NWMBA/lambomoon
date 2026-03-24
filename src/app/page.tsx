@@ -2,10 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { createBrowserClient } from "@supabase/ssr";
 import PriceTicker from "@/components/PriceTicker";
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 import { TrendingAlpha } from "@/components/TrendingAlpha";
 import { BiggestMovers } from "@/components/BiggestMovers";
 
@@ -89,7 +96,31 @@ export default function Home() {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [projects, setProjects] = useState(seedProjects);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
 
+  useEffect(() => {
+    checkUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function checkUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user || null);
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.refresh();
+  }
+
+  // Easter egg audio
   useEffect(() => {
     const audio = new Audio("/LamboMoon-IMT.mp3");
     audio.loop = true;
@@ -188,42 +219,40 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="hidden md:flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={`${sortBy === 'trending' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
-              onClick={() => setSortBy('trending')}
-            >
-              Trending
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={`${sortBy === 'newest' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
-              onClick={() => setSortBy('newest')}
-            >
-              New
-            </Button>
-            <Link href="/#categories">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                Categories
-              </Button>
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/#categories" className="text-muted-foreground hover:text-foreground">
+              Browse Cryptos
             </Link>
-            <Link href="/about">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                About
-              </Button>
+            {user && (
+              <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
+                Dashboard
+              </Link>
+            )}
+            <Link href="/about" className="text-muted-foreground hover:text-foreground">
+              About
             </Link>
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="outline" size="sm" className="border-border hover:bg-secondary">Sign In</Button>
-            </Link>
-            <Link href="/submit">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">Get Started</Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/submit">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90">Submit Crypto</Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-foreground">
+                  Log Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline" size="sm" className="border-border hover:bg-secondary">Sign In</Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -301,7 +330,9 @@ export default function Home() {
       <BiggestMovers limit={6} />
 
       {/* Trending Alpha Section */}
-      <TrendingAlpha />
+      <section id="trending">
+        <TrendingAlpha />
+      </section>
 
       {/* Projects Grid */}
       <section id="categories" className="py-16">

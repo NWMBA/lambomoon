@@ -5,6 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createBrowserClient } from "@supabase/ssr";
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // CoinGecko API response types
 interface CoinGeckoResponse {
@@ -121,6 +127,45 @@ export default function ProjectDetailPage() {
   const [coinData, setCoinData] = useState<CoinGeckoResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+
+  // Check auth and tracking status
+  useEffect(() => {
+    checkAuth();
+  }, [coinId]);
+
+  async function checkAuth() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      setUser(session.user);
+      // Check if tracking this coin
+      const { data } = await supabase
+        .from("tracked_cryptos")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .eq("coingecko_id", coinId)
+        .single();
+      setIsTracking(!!data);
+    }
+  }
+
+  async function toggleTrack() {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setTrackingLoading(true);
+    if (isTracking) {
+      await supabase.from("tracked_cryptos").delete().eq("user_id", user.id).eq("coingecko_id", coinId);
+      setIsTracking(false);
+    } else {
+      await supabase.from("tracked_cryptos").insert({ user_id: user.id, coingecko_id: coinId });
+      setIsTracking(true);
+    }
+    setTrackingLoading(false);
+  }
 
   const fetchCoinData = async () => {
     setLoading(true);
@@ -300,6 +345,15 @@ export default function ProjectDetailPage() {
                 {changeIcon} {price_change_percentage_24h >= 0 ? "+" : ""}{price_change_percentage_24h?.toFixed(2)}%
               </span>
               <span className="text-sm text-muted-foreground">24h</span>
+            </div>
+            <div className="mt-4">
+              <Button 
+                onClick={toggleTrack}
+                disabled={trackingLoading}
+                className={isTracking ? "bg-green-600 hover:bg-green-700" : "bg-primary hover:bg-primary/90"}
+              >
+                {trackingLoading ? "..." : isTracking ? "✓ Tracked" : "Track"}
+              </Button>
             </div>
           </div>
         </div>

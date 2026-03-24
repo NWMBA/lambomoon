@@ -40,7 +40,7 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -49,8 +49,27 @@ function LoginForm() {
       setError(error.message);
       setLoading(false);
     } else {
+      // Check if profile exists, create if not
+      if (data.session) {
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", data.session.user.id)
+          .single();
+
+        if (!existingProfile) {
+          // Create default profile
+          const username = email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_");
+          await supabase.from("profiles").insert({
+            id: data.session.user.id,
+            username,
+            display_name: username,
+            interested_categories: [],
+          });
+        }
+      }
       setMessage("Login successful! Redirecting...");
-      router.push(redirect);
+      router.push("/dashboard");
       router.refresh();
     }
   };
@@ -66,6 +85,9 @@ function LoginForm() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
 
     if (error) {
