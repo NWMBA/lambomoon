@@ -117,6 +117,16 @@ function getEditorialAngle(project: Project) {
   return "Steady signal with enough context to justify a closer look.";
 }
 
+function getSourceLabel(project: Project) {
+  return "CoinGecko + Community";
+}
+
+function getStatusLabel(project: Project) {
+  const ageDays = (Date.now() - new Date(project.launch_date).getTime()) / (1000 * 60 * 60 * 24);
+  if (ageDays <= 30) return "Fresh";
+  return "Listed";
+}
+
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -511,6 +521,10 @@ export default function Home() {
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs text-amber-400">{getBoostMilestone(project.upvotes)}</p>
                     <p className="text-xs text-primary">{getProjectBadge(project, index)}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3 text-xs">
+                    <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{getStatusLabel(project)}</span>
+                    <span className="px-2 py-1 rounded-full bg-secondary/60 text-muted-foreground">{getSourceLabel(project)}</span>
                   </div>
                   <div className="rounded-lg bg-secondary/30 border border-border/50 p-3 mb-4">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Why this stands out</p>

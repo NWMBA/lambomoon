@@ -65,6 +65,15 @@ function getCommunitySignal(boostCount: number, commentsCount: number) {
   return "Still early — this is where discovery can matter most.";
 }
 
+function getSourceLabel() {
+  return "CoinGecko + Community";
+}
+
+function getStatusLabel(rank?: number) {
+  if ((rank ?? 999999) < 500) return "Listed";
+  return "Watching";
+}
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -268,11 +277,15 @@ export default function ProjectDetailPage() {
           <div className="flex-1">
             <h1 className="text-3xl md:text-4xl font-bold mb-1">{coinData.name}</h1>
             <p className="text-xl text-muted-foreground font-mono uppercase mb-3">{coinData.symbol}</p>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <span className={`text-xl font-bold ${change >= 0 ? "text-green-400" : "text-red-400"}`}>
                 {change >= 0 ? "+" : ""}{change.toFixed(2)}%
               </span>
               <span className="text-sm text-muted-foreground">24h</span>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4 text-xs">
+              <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{getStatusLabel(rank)}</span>
+              <span className="px-2 py-1 rounded-full bg-secondary/60 text-muted-foreground">{getSourceLabel()}</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Button
