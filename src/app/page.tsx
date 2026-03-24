@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createBrowserClient } from "@supabase/ssr";
-import PriceTicker from "@/components/PriceTicker";
+import NewsTicker from "@/components/NewsTicker";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -315,8 +315,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Crypto Price Ticker */}
-      <PriceTicker />
+      {/* Discovery News Ticker */}
+      <NewsTicker />
 
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
