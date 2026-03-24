@@ -210,7 +210,7 @@ export default function Home() {
     }
   };
 
-  // Fetch live prices from our API (cached via Vercel)
+  // Fetch projects from Supabase (fallback to seeds) and live price/boost data
   useEffect(() => {
     const fetchLivePrices = async () => {
       try {
@@ -227,12 +227,34 @@ export default function Home() {
             return acc;
           }, {});
         } catch {}
+
+        let baseProjects: Project[] = seedProjects;
+        try {
+          const { data: importedRows } = await supabase
+            .from("cryptos")
+            .select("coingecko_id,name,symbol,category,notes,launch_date,price_change_24h,price_usd")
+            .not("coingecko_id", "is", null)
+            .limit(500);
+
+          if (importedRows && importedRows.length > 0) {
+            baseProjects = importedRows.map((row: any) => ({
+              id: row.coingecko_id,
+              name: row.name,
+              symbol: row.symbol || row.name?.slice(0, 4).toUpperCase() || "TKN",
+              category: row.category || "Uncategorized",
+              description: row.notes || "Indexed by LamboMoon from discovery sources.",
+              change_24h: row.price_change_24h || 0,
+              launch_date: row.launch_date || new Date().toISOString(),
+              upvotes: upvoteCounts[row.coingecko_id] || 0,
+              current_price: row.price_usd || prices[row.coingecko_id]?.usd || 0,
+            }));
+          }
+        } catch {}
         
-        // Update projects with live data and live upvote counts (fallback to seed values)
-        const updated = seedProjects.map(project => ({
+        const updated = baseProjects.map(project => ({
           ...project,
-          current_price: prices[project.id]?.usd || 0,
-          change_24h: prices[project.id]?.usd_24h_change || 0,
+          current_price: project.current_price ?? prices[project.id]?.usd ?? 0,
+          change_24h: prices[project.id]?.usd_24h_change ?? project.change_24h ?? 0,
           upvotes: upvoteCounts[project.id] ?? project.upvotes,
         }));
         
