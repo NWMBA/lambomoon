@@ -19,16 +19,7 @@ export default function DashboardPage() {
     // Fetch tracked cryptos
     const { data: tracked } = await supabase
       .from("tracked_cryptos")
-      .select(`
-        *,
-        cryptos (
-          name,
-          symbol,
-          logo_url,
-          category,
-          coingecko_id
-        )
-      `)
+      .select("*")
       .eq("user_id", userId);
 
     // Fetch votes
@@ -77,16 +68,16 @@ export default function DashboardPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function untrack(cryptoId: string) {
+  async function untrack(coinId: string) {
     if (!user) return;
     
     await supabase
       .from("tracked_cryptos")
       .delete()
       .eq("user_id", user.id)
-      .eq("crypto_id", cryptoId);
+      .eq("coingecko_id", coinId);
 
-    setTrackedCryptos(prev => prev.filter(t => t.crypto_id !== cryptoId));
+    setTrackedCryptos(prev => prev.filter(t => t.coingecko_id !== coinId));
   }
 
   if (loading) {
@@ -112,30 +103,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 relative">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <circle cx="75" cy="25" r="18" fill="#f4f4f5" />
-                <circle cx="70" cy="22" r="16" fill="#0a0a0f" />
-                <g transform="translate(10, 55)">
-                  <path d="M5 20 L15 10 L35 10 L45 20 L50 25 L50 30 L5 30 Z" fill="#22c55e" />
-                  <path d="M18 10 L25 5 L38 5 L42 10" fill="#22c55e" />
-                </g>
-              </svg>
-            </div>
-            <span className="text-xl font-bold">LamboMoon</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/profile" className="text-primary hover:underline">
-              Profile
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-8">My Dashboard</h1>
 
@@ -167,17 +134,13 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      {item.cryptos?.logo_url ? (
-                        <img src={item.cryptos.logo_url} alt="" className="w-8 h-8 rounded-full" />
-                      ) : (
-                        <span className="font-bold">{item.cryptos?.symbol?.[0]}</span>
-                      )}
+                      <span className="font-bold uppercase">{String(item.coingecko_id || "?").slice(0,1)}</span>
                     </div>
                     <div>
-                      <Link href={`/project/${item.cryptos?.coingecko_id}`} className="font-medium hover:text-primary">
-                        {item.cryptos?.name}
+                      <Link href={`/project/${item.coingecko_id}`} className="font-medium hover:text-primary capitalize">
+                        {String(item.coingecko_id || "unknown").replace(/-/g, " ")}
                       </Link>
-                      <p className="text-sm text-muted-foreground">{item.cryptos?.symbol}</p>
+                      <p className="text-sm text-muted-foreground font-mono">{item.coingecko_id}</p>
                     </div>
                   </div>
                   

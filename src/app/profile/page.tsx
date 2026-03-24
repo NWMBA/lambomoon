@@ -122,30 +122,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 relative">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <circle cx="75" cy="25" r="18" fill="#f4f4f5" />
-                <circle cx="70" cy="22" r="16" fill="#0a0a0f" />
-                <g transform="translate(10, 55)">
-                  <path d="M5 20 L15 10 L35 10 L45 20 L50 25 L50 30 L5 30 Z" fill="#22c55e" />
-                  <path d="M18 10 L25 5 L38 5 L42 10" fill="#22c55e" />
-                </g>
-              </svg>
-            </div>
-            <span className="text-xl font-bold">LamboMoon</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
-            <Link href="/" className="text-muted-foreground hover:text-foreground">Browse</Link>
-            <Link href="/submit" className="text-primary hover:underline">Submit Crypto</Link>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-12 max-w-2xl">
         <h1 className="text-3xl font-bold mb-8">Edit Profile</h1>
 

@@ -9,38 +9,34 @@ const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-interface NavbarProps {
-  showUserNav?: boolean;
-}
-
-export function Navbar({ showUserNav = true }: NavbarProps) {
+export function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Initialise auth and listen for changes
   useEffect(() => {
-    const initAuth = async () => {
+    const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user);
+      setUser(session?.user ?? null);
       setLoading(false);
     };
-
-    initAuth();
+    init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user);
+      setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
-  async function handleSignOut() {
+  const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.href = "/";
-  }
+  };
 
   return (
     <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <div className="w-10 h-10 relative">
             <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -55,8 +51,9 @@ export function Navbar({ showUserNav = true }: NavbarProps) {
           <span className="text-xl font-bold">LamboMoon</span>
         </Link>
 
+        {/* Nav links */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-muted-foreground hover:text-foreground">
+          <Link href="/#categories" className="text-muted-foreground hover:text-foreground">
             Browse Cryptos
           </Link>
           {user && (
@@ -69,9 +66,10 @@ export function Navbar({ showUserNav = true }: NavbarProps) {
           </Link>
         </nav>
 
+        {/* Auth actions */}
         <div className="flex items-center gap-2">
           {loading ? (
-            <span className="text-sm text-muted-foreground">...</span>
+            <span className="text-sm text-muted-foreground">…</span>
           ) : user ? (
             <>
               <Link href="/submit">
@@ -79,7 +77,7 @@ export function Navbar({ showUserNav = true }: NavbarProps) {
                   Submit Crypto
                 </button>
               </Link>
-              <button 
+              <button
                 onClick={handleSignOut}
                 className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
