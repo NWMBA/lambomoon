@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [trackedCryptos, setTrackedCryptos] = useState<any[]>([]);
   const [votes, setVotes] = useState<any[]>([]);
+  const [marketData, setMarketData] = useState<Record<string, { usd?: number; usd_24h_change?: number }>>({});
 
   async function fetchDashboardData(userId: string) {
     // Fetch tracked cryptos
@@ -21,6 +22,23 @@ export default function DashboardPage() {
       .from("tracked_cryptos")
       .select("*")
       .eq("user_id", userId);
+
+    if (tracked?.length) {
+      const ids = tracked.map((item) => item.coingecko_id).filter(Boolean).join(",");
+      if (ids) {
+        try {
+          const response = await fetch(
+            `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`
+          );
+          if (response.ok) {
+            const prices = await response.json();
+            setMarketData(prices || {});
+          }
+        } catch {}
+      }
+    } else {
+      setMarketData({});
+    }
 
     // Fetch votes
     const { data: userVotes } = await supabase
@@ -145,6 +163,18 @@ export default function DashboardPage() {
                   </div>
                   
                   <div className="flex items-center gap-4">
+                    <div className="text-right min-w-[90px]">
+                      <p className="text-sm text-muted-foreground">Price</p>
+                      <p className="font-medium">
+                        {marketData[item.coingecko_id]?.usd != null ? `$${Number(marketData[item.coingecko_id]?.usd).toFixed(2)}` : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right min-w-[90px]">
+                      <p className="text-sm text-muted-foreground">24h</p>
+                      <p className={`font-medium ${(marketData[item.coingecko_id]?.usd_24h_change ?? 0) >= 0 ? "text-green-400" : "text-red-400"}`}>
+                        {marketData[item.coingecko_id]?.usd_24h_change != null ? `${(marketData[item.coingecko_id]?.usd_24h_change ?? 0) >= 0 ? "+" : ""}${Number(marketData[item.coingecko_id]?.usd_24h_change).toFixed(1)}%` : "—"}
+                      </p>
+                    </div>
                     {item.entry_price && (
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">Entry</p>

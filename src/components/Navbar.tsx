@@ -57,9 +57,14 @@ export function Navbar() {
             Browse Cryptos
           </Link>
           {user && (
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              Dashboard
-            </Link>
+            <>
+              <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
+                Dashboard
+              </Link>
+              <Link href="/profile" className="text-muted-foreground hover:text-foreground">
+                Profile
+              </Link>
+            </>
           )}
           <Link href="/about" className="text-muted-foreground hover:text-foreground">
             About
