@@ -115,6 +115,26 @@
     }
   },
   {
+    "source": "manual",
+    "coingecko_id": null,
+    "name": "Fuel",
+    "symbol": "FUEL",
+    "slug": "fuel",
+    "status": "watching",
+    "category": "Infrastructure",
+    "ecosystem": "Modular",
+    "tags": [
+      "watching",
+      "execution-layer"
+    ],
+    "website_url": "https://fuel.network",
+    "x_url": "https://x.com/FuelLabs_",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:44:41.906Z",
+    "confidence_score": 0.9,
+    "notes": "Manual watchlist candidate for future token / ecosystem monitoring."
+  },
+  {
     "source": "cryptorank",
     "source_url": "https://cryptorank.io/",
     "coingecko_id": null,
@@ -132,7 +152,7 @@
     "website_url": "https://initia.xyz",
     "x_url": "https://x.com/initia",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:38:38.386Z",
+    "first_seen_at": "2026-03-24T15:44:41.906Z",
     "confidence_score": 0.8,
     "notes": "Appchain-focused project with upcoming-token watch potential."
   },
@@ -154,7 +174,7 @@
     "website_url": "https://megaeth.com",
     "x_url": "https://x.com/megaeth_labs",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:38:38.386Z",
+    "first_seen_at": "2026-03-24T15:44:41.906Z",
     "confidence_score": 0.8,
     "notes": "Monitor as an upcoming Ethereum scaling narrative project."
   },
@@ -176,7 +196,7 @@
     "website_url": "https://monad.xyz",
     "x_url": "https://x.com/monad_xyz",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:38:38.386Z",
+    "first_seen_at": "2026-03-24T15:44:41.906Z",
     "confidence_score": 0.8,
     "notes": "High-attention next-gen L1 to monitor for token launch / ecosystem growth."
   }

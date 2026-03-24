@@ -5,6 +5,10 @@ import {
   mapCryptoRankUpcomingToNormalized,
   type CryptoRankUpcomingRecord,
 } from "../src/lib/ingest/cryptorank.ts";
+import {
+  mapManualProjectToNormalized,
+  type ManualProjectRecord,
+} from "../src/lib/ingest/manual.ts";
 
 function loadJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -13,11 +17,13 @@ function loadJson<T>(path: string): T {
 async function main() {
   const listed = loadJson<NormalizedCryptoRecord[]>("data/imports/coingecko-normalized.json");
   const upcomingRaw = loadJson<CryptoRankUpcomingRecord[]>("data/imports/upcoming-projects.json");
+  const manualRaw = loadJson<ManualProjectRecord[]>("data/imports/manual-watchlist.json");
   const upcoming = upcomingRaw.map(mapCryptoRankUpcomingToNormalized);
+  const manual = manualRaw.map(mapManualProjectToNormalized);
 
   const merged = new Map<string, NormalizedCryptoRecord>();
 
-  for (const record of [...listed, ...upcoming]) {
+  for (const record of [...listed, ...upcoming, ...manual]) {
     const key = dedupeKey(record);
     merged.set(key, mergeRecords(merged.get(key), record));
   }
@@ -31,7 +37,7 @@ async function main() {
 
   mkdirSync("data/imports", { recursive: true });
   writeFileSync("data/imports/universe-merged.json", JSON.stringify(output, null, 2));
-  console.log(`Merged ${listed.length} listed + ${upcoming.length} upcoming into ${output.length} normalized records.`);
+  console.log(`Merged ${listed.length} listed + ${upcoming.length} upcoming + ${manual.length} manual into ${output.length} normalized records.`);
 }
 
 main().catch((err) => {

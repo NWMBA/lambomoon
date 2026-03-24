@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Fuel",
+    "symbol": "FUEL",
+    "status": "watching",
+    "category": "Infrastructure",
+    "ecosystem": "Modular",
+    "tags": ["watching", "execution-layer"],
+    "website_url": "https://fuel.network",
+    "x_url": "https://x.com/FuelLabs_",
+    "notes": "Manual watchlist candidate for future token / ecosystem monitoring.",
+    "confidence_score": 0.9
+  }
+]
