@@ -507,11 +507,11 @@ export default function Home() {
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">{project.category}</span>
+                      <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">{project.category || "Uncategorized"}</span>
                       <span className="text-xs text-muted-foreground">⬆ {project.upvotes}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">${project.current_price?.toFixed(2) || '0.00'}</span>
+                      <span className="text-sm font-medium">{project.current_price != null ? `$${project.current_price.toFixed(2)}` : 'Price pending'}</span>
                       <span className={`text-sm font-medium ${project.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {project.change_24h >= 0 ? '+' : ''}{project.change_24h?.toFixed(1) || '0.0'}%
                       </span>

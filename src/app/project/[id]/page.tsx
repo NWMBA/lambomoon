@@ -352,11 +352,18 @@ export default function ProjectDetailPage() {
           </Card>
         </div>
 
-        {coinData.description?.en && (
+        {coinData.description?.en ? (
           <Card className="mb-8">
             <CardHeader><CardTitle>About {coinData.name}</CardTitle></CardHeader>
             <CardContent>
               <div className="prose prose-invert prose-sm max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: coinData.description.en }} />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-8">
+            <CardHeader><CardTitle>About {coinData.name}</CardTitle></CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">This project is still early in the LamboMoon index. More metadata, links, and editorial context can be added as discovery improves.</p>
             </CardContent>
           </Card>
         )}
@@ -403,7 +410,7 @@ export default function ProjectDetailPage() {
         <Card>
           <CardHeader><CardTitle>Official Links</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 mb-4">
               {coinData.links?.homepage?.[0] && (
                 <a href={coinData.links.homepage[0]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 rounded-lg transition-colors">Website</a>
               )}
@@ -412,6 +419,9 @@ export default function ProjectDetailPage() {
               )}
               <a href={`https://www.coingecko.com/en/coins/${coinData.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 rounded-lg transition-colors">CoinGecko</a>
             </div>
+            {!coinData.links?.homepage?.[0] && !coinData.links?.blockchain_site?.[0] && (
+              <p className="text-sm text-muted-foreground">External project links are still sparse here. That usually means this entry is early, lightly indexed, or waiting for richer enrichment.</p>
+            )}
           </CardContent>
         </Card>
       </main>
