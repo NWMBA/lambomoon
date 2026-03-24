@@ -109,6 +109,14 @@ function getProjectBadge(project: Project, index?: number) {
   return getBoostMilestone(project.upvotes);
 }
 
+function getEditorialAngle(project: Project) {
+  if (project.upvotes >= 400) return "Strong community conviction is building here.";
+  if ((project.change_24h || 0) >= 5) return "Fresh momentum makes this one worth watching now.";
+  const ageDays = (Date.now() - new Date(project.launch_date).getTime()) / (1000 * 60 * 60 * 24);
+  if (ageDays <= 30) return "Recently added and still early in the discovery cycle.";
+  return "Steady signal with enough context to justify a closer look.";
+}
+
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -500,9 +508,13 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-2">
                     <p className="text-xs text-amber-400">{getBoostMilestone(project.upvotes)}</p>
                     <p className="text-xs text-primary">{getProjectBadge(project, index)}</p>
+                  </div>
+                  <div className="rounded-lg bg-secondary/30 border border-border/50 p-3 mb-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Why this stands out</p>
+                    <p className="text-sm text-foreground/90">{getEditorialAngle(project)}</p>
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/project/${project.id}`} className="flex-1">
