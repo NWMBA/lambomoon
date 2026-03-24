@@ -45,6 +45,26 @@ function getBoostMilestone(count: number) {
   return "🌱 Early";
 }
 
+function getRiskLevel(rank?: number, change?: number) {
+  if ((rank ?? 999999) < 50 && Math.abs(change ?? 0) < 8) return "Low";
+  if ((rank ?? 999999) < 200 && Math.abs(change ?? 0) < 15) return "Medium";
+  return "High";
+}
+
+function getEditorialThesis(name: string, rank?: number, change?: number, boostCount?: number) {
+  if ((boostCount ?? 0) >= 100) return `${name} is getting strong community conviction and looks like a genuine momentum candidate.`;
+  if ((rank ?? 999999) < 100) return `${name} already has meaningful market traction, which gives the move more credibility than a random microcap spike.`;
+  if ((change ?? 0) > 5) return `${name} is showing fresh price momentum, which is exactly the kind of early movement LamboMoon users want to catch.`;
+  return `${name} looks interesting as a developing narrative play — not fully proven, but worth tracking for fresh signals.`;
+}
+
+function getCommunitySignal(boostCount: number, commentsCount: number) {
+  if (boostCount >= 100) return "Community conviction is already building here.";
+  if (commentsCount >= 5) return "People are starting to discuss this one, which usually means narrative is forming.";
+  if (boostCount > 0) return "Early community interest is forming, but it still feels early.";
+  return "Still early — this is where discovery can matter most.";
+}
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -225,6 +245,10 @@ export default function ProjectDetailPage() {
   }
 
   const change = coinData.market_data?.price_change_percentage_24h ?? 0;
+  const rank = coinData.market_data?.market_cap_rank;
+  const riskLevel = getRiskLevel(rank, change);
+  const editorialThesis = getEditorialThesis(coinData.name, rank, change, upvoteCount);
+  const communitySignal = getCommunitySignal(upvoteCount, comments.length);
 
   return (
     <div className="min-h-screen">
@@ -275,6 +299,44 @@ export default function ProjectDetailPage() {
           <Card><CardHeader><CardTitle className="text-sm">Market Cap</CardTitle></CardHeader><CardContent>{formatMoney(coinData.market_data?.market_cap?.usd)}</CardContent></Card>
           <Card><CardHeader><CardTitle className="text-sm">24h Volume</CardTitle></CardHeader><CardContent>{formatMoney(coinData.market_data?.total_volume?.usd)}</CardContent></Card>
           <Card><CardHeader><CardTitle className="text-sm">Rank</CardTitle></CardHeader><CardContent>#{coinData.market_data?.market_cap_rank ?? "N/A"}</CardContent></Card>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-4 mb-8">
+          <Card className="lg:col-span-2">
+            <CardHeader><CardTitle>Editorial Thesis</CardTitle></CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground leading-7">{editorialThesis}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Risk & Community</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Risk Level</span>
+                <span className={`text-sm font-medium ${riskLevel === "Low" ? "text-green-400" : riskLevel === "Medium" ? "text-yellow-400" : "text-red-400"}`}>{riskLevel}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Boost Milestone</span>
+                <span className="text-sm font-medium text-amber-400">{getBoostMilestone(upvoteCount)}</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{communitySignal}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <Card>
+            <CardHeader><CardTitle className="text-sm">Why it’s interesting</CardTitle></CardHeader>
+            <CardContent><p className="text-sm text-muted-foreground">{change >= 0 ? "Positive short-term momentum with active community discovery." : "Price is cooling off, which can create an early-entry setup if conviction remains strong."}</p></CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle className="text-sm">What to watch</CardTitle></CardHeader>
+            <CardContent><p className="text-sm text-muted-foreground">Watch Boost velocity, comment activity, and whether 24h momentum keeps compounding.</p></CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle className="text-sm">LamboMoon Take</CardTitle></CardHeader>
+            <CardContent><p className="text-sm text-muted-foreground">This page combines market context with social conviction — the combination matters more than either signal alone.</p></CardContent>
+          </Card>
         </div>
 
         {coinData.description?.en && (
