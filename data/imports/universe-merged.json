@@ -115,6 +115,28 @@
     }
   },
   {
+    "source": "coinlaunch",
+    "source_url": "https://coinlaunch.space/",
+    "coingecko_id": null,
+    "name": "Berachain",
+    "symbol": "BERA",
+    "slug": "berachain",
+    "status": "prelaunch",
+    "category": "L1",
+    "ecosystem": "EVM",
+    "tags": [
+      "upcoming",
+      "l1",
+      "community"
+    ],
+    "website_url": "https://www.berachain.com",
+    "x_url": "https://x.com/berachain",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:49:45.107Z",
+    "confidence_score": 0.75,
+    "notes": "High-attention chain launch candidate with strong community narrative."
+  },
+  {
     "source": "manual",
     "coingecko_id": null,
     "name": "Fuel",
@@ -130,7 +152,7 @@
     "website_url": "https://fuel.network",
     "x_url": "https://x.com/FuelLabs_",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:44:41.906Z",
+    "first_seen_at": "2026-03-24T15:49:45.107Z",
     "confidence_score": 0.9,
     "notes": "Manual watchlist candidate for future token / ecosystem monitoring."
   },
@@ -152,7 +174,7 @@
     "website_url": "https://initia.xyz",
     "x_url": "https://x.com/initia",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:44:41.906Z",
+    "first_seen_at": "2026-03-24T15:49:45.107Z",
     "confidence_score": 0.8,
     "notes": "Appchain-focused project with upcoming-token watch potential."
   },
@@ -174,7 +196,7 @@
     "website_url": "https://megaeth.com",
     "x_url": "https://x.com/megaeth_labs",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:44:41.906Z",
+    "first_seen_at": "2026-03-24T15:49:45.107Z",
     "confidence_score": 0.8,
     "notes": "Monitor as an upcoming Ethereum scaling narrative project."
   },
@@ -196,8 +218,52 @@
     "website_url": "https://monad.xyz",
     "x_url": "https://x.com/monad_xyz",
     "launch_date": null,
-    "first_seen_at": "2026-03-24T15:44:41.906Z",
+    "first_seen_at": "2026-03-24T15:49:45.106Z",
     "confidence_score": 0.8,
     "notes": "High-attention next-gen L1 to monitor for token launch / ecosystem growth."
+  },
+  {
+    "source": "coinlaunch",
+    "source_url": "https://coinlaunch.space/",
+    "coingecko_id": null,
+    "name": "Movement",
+    "symbol": "MOVE",
+    "slug": "movement",
+    "status": "prelaunch",
+    "category": "Infrastructure",
+    "ecosystem": "Move",
+    "tags": [
+      "upcoming",
+      "modular",
+      "move-vm"
+    ],
+    "website_url": "https://movementlabs.xyz",
+    "x_url": "https://x.com/movementlabsxyz",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:49:45.107Z",
+    "confidence_score": 0.75,
+    "notes": "Move ecosystem growth candidate worth monitoring for launch timing."
+  },
+  {
+    "source": "coinlaunch",
+    "source_url": "https://coinlaunch.space/",
+    "coingecko_id": null,
+    "name": "Sophon",
+    "symbol": "SOPH",
+    "slug": "sophon",
+    "status": "prelaunch",
+    "category": "Infrastructure",
+    "ecosystem": "ZK",
+    "tags": [
+      "upcoming",
+      "zk",
+      "consumer-crypto"
+    ],
+    "website_url": "https://sophon.xyz",
+    "x_url": "https://x.com/sophon",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:49:45.107Z",
+    "confidence_score": 0.75,
+    "notes": "Interesting consumer-crypto / zk narrative project for watchlists."
   }
 ]

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Berachain",
+    "symbol": "BERA",
+    "website_url": "https://www.berachain.com",
+    "x_url": "https://x.com/berachain",
+    "category": "L1",
+    "ecosystem": "EVM",
+    "tags": ["upcoming", "l1", "community"],
+    "launch_date": null,
+    "notes": "High-attention chain launch candidate with strong community narrative.",
+    "source_url": "https://coinlaunch.space/"
+  },
+  {
+    "name": "Movement",
+    "symbol": "MOVE",
+    "website_url": "https://movementlabs.xyz",
+    "x_url": "https://x.com/movementlabsxyz",
+    "category": "Infrastructure",
+    "ecosystem": "Move",
+    "tags": ["upcoming", "modular", "move-vm"],
+    "launch_date": null,
+    "notes": "Move ecosystem growth candidate worth monitoring for launch timing.",
+    "source_url": "https://coinlaunch.space/"
+  },
+  {
+    "name": "Sophon",
+    "symbol": "SOPH",
+    "website_url": "https://sophon.xyz",
+    "x_url": "https://x.com/sophon",
+    "category": "Infrastructure",
+    "ecosystem": "ZK",
+    "tags": ["upcoming", "zk", "consumer-crypto"],
+    "launch_date": null,
+    "notes": "Interesting consumer-crypto / zk narrative project for watchlists.",
+    "source_url": "https://coinlaunch.space/"
+  }
+]
