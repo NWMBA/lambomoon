@@ -131,7 +131,8 @@ export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'top'>('trending');
+  const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'top' | 'name' | 'symbol' | 'category' | 'price' | 'change'>('trending');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -260,14 +261,35 @@ export default function Home() {
     });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    if (sortBy === 'newest') return new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime();
-    if (sortBy === 'top') return b.upvotes - a.upvotes;
-    return getTrendingScore(b) - getTrendingScore(a);
+    let result = 0;
+    if (sortBy === 'newest') result = new Date(a.launch_date).getTime() - new Date(b.launch_date).getTime();
+    else if (sortBy === 'top') result = a.upvotes - b.upvotes;
+    else if (sortBy === 'name') result = a.name.localeCompare(b.name);
+    else if (sortBy === 'symbol') result = a.symbol.localeCompare(b.symbol);
+    else if (sortBy === 'category') result = a.category.localeCompare(b.category);
+    else if (sortBy === 'price') result = (a.current_price || 0) - (b.current_price || 0);
+    else if (sortBy === 'change') result = (a.change_24h || 0) - (b.change_24h || 0);
+    else result = getTrendingScore(a) - getTrendingScore(b);
+    return sortDirection === 'asc' ? result : -result;
   });
 
   const trendingNow = [...projects].sort((a, b) => getTrendingScore(b) - getTrendingScore(a)).slice(0, 3);
   const mostBoosted = [...projects].sort((a, b) => b.upvotes - a.upvotes).slice(0, 3);
   const newlyAdded = [...projects].sort((a, b) => new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime()).slice(0, 3);
+
+  function toggleSort(column: 'name' | 'symbol' | 'category' | 'price' | 'change' | 'top' | 'newest') {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDirection(column === 'name' || column === 'symbol' || column === 'category' ? 'asc' : 'desc');
+    }
+  }
+
+  function sortIndicator(column: string) {
+    if (sortBy !== column) return '↕';
+    return sortDirection === 'asc' ? '↑' : '↓';
+  }
 
   return (
     <div className="min-h-screen">
@@ -438,10 +460,15 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold text-foreground">
-              {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "Browse Cryptos"}
-            </h3>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-3xl font-bold text-foreground">
+                {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "Browse Cryptos"}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {viewMode === 'table' ? 'Click table headers to sort.' : 'Use cards for scan mode, table for comparison mode.'}
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'outline'}
@@ -458,30 +485,6 @@ export default function Home() {
                 className={viewMode === 'table' ? 'bg-primary' : 'border-border'}
               >
                 Table
-              </Button>
-              <Button
-                variant={sortBy === "trending" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("trending")}
-                className={sortBy === "trending" ? "bg-primary" : "border-border"}
-              >
-                🔥 Trending
-              </Button>
-              <Button
-                variant={sortBy === "newest" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("newest")}
-                className={sortBy === "newest" ? "bg-primary" : "border-border"}
-              >
-                ✨ Newest
-              </Button>
-              <Button
-                variant={sortBy === "top" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("top")}
-                className={sortBy === "top" ? "bg-primary" : "border-border"}
-              >
-                ⬆️ Top
               </Button>
             </div>
           </div>
@@ -552,12 +555,13 @@ export default function Home() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Name</th>
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Symbol</th>
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Category</th>
-                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">Price</th>
-                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">24h Change</th>
-                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground">Market Cap</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('name')}>Name {sortIndicator('name')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('symbol')}>Symbol {sortIndicator('symbol')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('category')}>Category {sortIndicator('category')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Source / Status</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('price')}>Price {sortIndicator('price')}</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('change')}>24h Change {sortIndicator('change')}</th>
+                  <th className="text-right py-3 px-4 font-semibold text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('top')}>Boosts {sortIndicator('top')}</th>
                   <th className="text-right py-3 px-4 font-semibold text-muted-foreground">Action</th>
                 </tr>
               </thead>
@@ -572,14 +576,20 @@ export default function Home() {
                     </td>
                     <td className="py-3 px-4 font-mono text-primary">{project.symbol}</td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-1 text-xs rounded-full bg-secondary">{project.category}</span>
+                      <span className="px-2 py-1 text-xs rounded-full bg-secondary">{project.category || 'Uncategorized'}</span>
                     </td>
-                    <td className="py-3 px-4 text-right font-medium">${project.current_price?.toFixed(2) || '0.00'}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="px-2 py-1 rounded-full bg-secondary/60 text-muted-foreground">{getSourceLabel(project)}</span>
+                        <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{getStatusLabel(project)}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium">{project.current_price != null ? `$${project.current_price.toFixed(2)}` : '—'}</td>
                     <td className={`py-3 px-4 text-right font-medium ${project.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {project.change_24h >= 0 ? '+' : ''}{project.change_24h?.toFixed(1) || '0.0'}%
                     </td>
                     <td className="py-3 px-4 text-right text-muted-foreground">
-                      ${((project.current_price || 0) * 1000000).toLocaleString()}
+                      🚀 {project.upvotes}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex justify-end gap-2">
