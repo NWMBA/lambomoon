@@ -193,12 +193,12 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Recent Upvotes */}
+        {/* Recent Boosts */}
         <section>
-          <h2 className="text-xl font-semibold mb-4">Recent Upvotes</h2>
+          <h2 className="text-xl font-semibold mb-4">Recent Boosts</h2>
           
           {upvotes.length === 0 ? (
-            <p className="text-muted-foreground">You haven't upvoted any cryptos yet</p>
+            <p className="text-muted-foreground">You haven't boosted any cryptos yet</p>
           ) : (
             <div className="space-y-2">
               {upvotes.map((vote) => (

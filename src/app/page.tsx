@@ -92,6 +92,14 @@ function getTrendingScore(project: Project) {
   return project.upvotes / Math.pow(ageInHours + 2, gravity);
 }
 
+function getBoostMilestone(count: number) {
+  if (count >= 500) return "🌕 Moonshot";
+  if (count >= 250) return "🚀 Orbit";
+  if (count >= 100) return "🔥 Ignition";
+  if (count >= 25) return "⚡ Lift-off";
+  return "🌱 Early";
+}
+
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -103,6 +111,7 @@ export default function Home() {
   const [projects, setProjects] = useState(seedProjects);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [boostedIds, setBoostedIds] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -111,19 +120,44 @@ export default function Home() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
+      if (session?.user) loadBoostedIds(session.user.id); else setBoostedIds([]);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  async function loadBoostedIds(userId: string) {
+    const { data } = await supabase.from("crypto_upvotes").select("coingecko_id").eq("user_id", userId);
+    setBoostedIds((data || []).map((row: any) => row.coingecko_id).filter(Boolean));
+  }
+
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession();
     setUser(session?.user || null);
+    if (session?.user) await loadBoostedIds(session.user.id);
   }
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     router.refresh();
+  }
+
+  async function toggleBoost(projectId: string) {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const hasBoosted = boostedIds.includes(projectId);
+    if (hasBoosted) {
+      await supabase.from("crypto_upvotes").delete().eq("user_id", user.id).eq("coingecko_id", projectId);
+      setBoostedIds((prev) => prev.filter((id) => id !== projectId));
+      setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, upvotes: Math.max(0, p.upvotes - 1) } : p));
+    } else {
+      await supabase.from("crypto_upvotes").insert({ user_id: user.id, coingecko_id: projectId });
+      setBoostedIds((prev) => [...prev, projectId]);
+      setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, upvotes: p.upvotes + 1 } : p));
+    }
   }
 
   // Easter egg audio
@@ -382,12 +416,20 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
+                  <p className="text-xs text-amber-400 mb-4">{getBoostMilestone(project.upvotes)}</p>
                   <div className="flex gap-2">
                     <Link href={`/project/${project.id}`} className="flex-1">
                       <Button size="sm" className="w-full bg-primary hover:bg-primary/90">View Details</Button>
                     </Link>
-                    <Button size="sm" variant="outline">🔖</Button>
+                    <Button
+                      size="sm"
+                      variant={boostedIds.includes(project.id) ? "default" : "outline"}
+                      className={boostedIds.includes(project.id) ? "bg-green-600 hover:bg-green-700" : "border-border"}
+                      onClick={() => toggleBoost(project.id)}
+                    >
+                      🚀 Boost
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -428,9 +470,19 @@ export default function Home() {
                       ${((project.current_price || 0) * 1000000).toLocaleString()}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <Link href={`/project/${project.id}`}>
-                        <Button size="sm" className="bg-primary hover:bg-primary/90">View</Button>
-                      </Link>
+                      <div className="flex justify-end gap-2">
+                        <Link href={`/project/${project.id}`}>
+                          <Button size="sm" className="bg-primary hover:bg-primary/90">View</Button>
+                        </Link>
+                        <Button
+                          size="sm"
+                          variant={boostedIds.includes(project.id) ? "default" : "outline"}
+                          className={boostedIds.includes(project.id) ? "bg-green-600 hover:bg-green-700" : "border-border"}
+                          onClick={() => toggleBoost(project.id)}
+                        >
+                          🚀
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

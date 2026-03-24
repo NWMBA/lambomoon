@@ -13,6 +13,8 @@ const CATEGORIES = [
   "DeFi", "AI Agents", "L1", "L2", "NFT", "Gaming", "RWA", "Privacy", "Infrastructure", "Memes"
 ];
 
+const AVATARS = ["🚀", "🌕", "🐄", "🐂", "🧠", "⚡", "💎", "🛰️", "🧪", "🐧", "🤖", "🔥"];
+
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -21,6 +23,10 @@ export default function ProfilePage() {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [interestedCategories, setInterestedCategories] = useState<string[]>([]);
+  const [avatarId, setAvatarId] = useState("🚀");
+  const [xUrl, setXUrl] = useState("");
+  const [telegramUrl, setTelegramUrl] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
 
   async function fetchProfile(userId: string) {
     const { data } = await supabase
@@ -33,6 +39,10 @@ export default function ProfilePage() {
       setUsername(data.username || "");
       setBio(data.bio || "");
       setInterestedCategories(data.interested_categories || []);
+      setAvatarId(data.avatar_id || "🚀");
+      setXUrl(data.x_url || "");
+      setTelegramUrl(data.telegram_url || "");
+      setWebsiteUrl(data.website_url || "");
     }
     setLoading(false);
   }
@@ -75,6 +85,10 @@ export default function ProfilePage() {
         username,
         bio,
         interested_categories: interestedCategories,
+        avatar_id: avatarId,
+        x_url: xUrl,
+        telegram_url: telegramUrl,
+        website_url: websiteUrl,
         updated_at: new Date().toISOString()
       }, { onConflict: "id" });
 
@@ -93,28 +107,18 @@ export default function ProfilePage() {
 
   function toggleCategory(cat: string) {
     setInterestedCategories(prev => 
-      prev.includes(cat) 
-        ? prev.filter(c => c !== cat)
-        : [...prev, cat]
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>;
 
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Sign in to view your profile</h1>
-          <Link href="/login" className="text-primary hover:underline">
-            Go to Login
-          </Link>
+          <Link href="/login" className="text-primary hover:underline">Go to Login</Link>
         </div>
       </div>
     );
@@ -126,7 +130,22 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-bold mb-8">Edit Profile</h1>
 
         <div className="space-y-6">
-          {/* Username */}
+          <div>
+            <label className="block text-sm font-medium mb-3">Choose Avatar</label>
+            <div className="grid grid-cols-6 gap-2">
+              {AVATARS.map((avatar) => (
+                <button
+                  key={avatar}
+                  type="button"
+                  onClick={() => setAvatarId(avatar)}
+                  className={`h-14 rounded-lg text-2xl border ${avatarId === avatar ? "border-primary bg-primary/10" : "border-border bg-secondary hover:bg-secondary/80"}`}
+                >
+                  {avatar}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-2">Username</label>
             <input
@@ -138,7 +157,6 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Bio */}
           <div>
             <label className="block text-sm font-medium mb-2">Bio</label>
             <textarea
@@ -150,7 +168,21 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Interested Categories */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">X / Twitter</label>
+              <input value={xUrl} onChange={(e) => setXUrl(e.target.value)} className="w-full px-4 py-2 rounded-lg bg-secondary border border-border focus:border-primary outline-none" placeholder="https://x.com/..." />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Telegram</label>
+              <input value={telegramUrl} onChange={(e) => setTelegramUrl(e.target.value)} className="w-full px-4 py-2 rounded-lg bg-secondary border border-border focus:border-primary outline-none" placeholder="https://t.me/..." />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Website</label>
+              <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} className="w-full px-4 py-2 rounded-lg bg-secondary border border-border focus:border-primary outline-none" placeholder="https://..." />
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-3">Interested Categories</label>
             <div className="flex flex-wrap gap-2">
@@ -171,7 +203,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Save Button */}
           <div className="flex items-center gap-4 pt-4">
             <button
               onClick={saveProfile}
@@ -180,21 +211,11 @@ export default function ProfilePage() {
             >
               {saving ? "Saving..." : "Save Profile"}
             </button>
-            {message && (
-              <span className={message.startsWith("Error") ? "text-red-400" : "text-green-400"}>
-                {message}
-              </span>
-            )}
+            {message && <span className={message.startsWith("Error") ? "text-red-400" : "text-green-400"}>{message}</span>}
           </div>
 
-          {/* Sign Out */}
           <div className="pt-8 border-t border-border">
-            <button
-              onClick={signOut}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Sign Out
-            </button>
+            <button onClick={signOut} className="text-muted-foreground hover:text-foreground">Sign Out</button>
           </div>
         </div>
       </main>

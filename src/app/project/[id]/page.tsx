@@ -37,6 +37,14 @@ function formatMoney(value?: number) {
   return `$${value.toFixed(6)}`;
 }
 
+function getBoostMilestone(count: number) {
+  if (count >= 500) return "🌕 Moonshot";
+  if (count >= 250) return "🚀 Orbit";
+  if (count >= 100) return "🔥 Ignition";
+  if (count >= 25) return "⚡ Lift-off";
+  return "🌱 Early";
+}
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -51,6 +59,9 @@ export default function ProjectDetailPage() {
   const [upvoteCount, setUpvoteCount] = useState(0);
   const [hasUpvoted, setHasUpvoted] = useState(false);
   const [upvoteLoading, setUpvoteLoading] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
 
   async function refreshSocial(userId?: string) {
     const { count } = await supabase
@@ -58,6 +69,19 @@ export default function ProjectDetailPage() {
       .select("id", { count: "exact", head: true })
       .eq("coingecko_id", coinId);
     setUpvoteCount(count || 0);
+
+    const { data: commentRows } = await supabase
+      .from("crypto_comments")
+      .select(`
+        *,
+        profiles (
+          username,
+          avatar_id
+        )
+      `)
+      .eq("coingecko_id", coinId)
+      .order("created_at", { ascending: false });
+    setComments(commentRows || []);
 
     if (userId) {
       const { data: tracked } = await supabase
@@ -164,6 +188,26 @@ export default function ProjectDetailPage() {
     }
   }
 
+  async function submitComment() {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (!commentText.trim()) return;
+    setCommentLoading(true);
+    try {
+      await supabase.from("crypto_comments").insert({
+        user_id: user.id,
+        coingecko_id: coinId,
+        content: commentText.trim(),
+      });
+      setCommentText("");
+      await refreshSocial(user.id);
+    } finally {
+      setCommentLoading(false);
+    }
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading coin…</p></div>;
   }
@@ -206,14 +250,15 @@ export default function ProjectDetailPage() {
               </span>
               <span className="text-sm text-muted-foreground">24h</span>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Button
                 onClick={toggleUpvote}
                 disabled={upvoteLoading}
                 className={hasUpvoted ? "bg-green-600 hover:bg-green-700" : "bg-primary hover:bg-primary/90"}
               >
-                {upvoteLoading ? "…" : hasUpvoted ? `👍 Upvoted (${upvoteCount})` : `👍 Upvote (${upvoteCount})`}
+                {upvoteLoading ? "…" : hasUpvoted ? `🚀 Boosted (${upvoteCount})` : `🚀 Boost (${upvoteCount})`}
               </Button>
+              <span className="text-xs text-amber-400">{getBoostMilestone(upvoteCount)}</span>
               <Button
                 onClick={toggleTrack}
                 disabled={trackingLoading}
@@ -240,6 +285,45 @@ export default function ProjectDetailPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card className="mb-8">
+          <CardHeader><CardTitle>Boost Comments</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 rounded-lg bg-secondary border border-border focus:border-primary outline-none resize-none"
+                  placeholder={user ? "Why are you bullish on this one?" : "Sign in to comment"}
+                  disabled={!user || commentLoading}
+                />
+                <Button onClick={submitComment} disabled={!user || commentLoading || !commentText.trim()}>
+                  {commentLoading ? "Posting..." : "Post Comment"}
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {comments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No comments yet.</p>
+                ) : comments.map((comment) => (
+                  <div key={comment.id} className="rounded-lg border border-border p-3 bg-card/40">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-lg">
+                        {comment.profiles?.avatar_id || "🚀"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{comment.profiles?.username || "Anon"}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(comment.created_at).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{comment.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader><CardTitle>Official Links</CardTitle></CardHeader>
