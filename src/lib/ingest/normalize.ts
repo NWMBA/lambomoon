@@ -42,3 +42,20 @@ export function mergeRecords(
     confidence_score: Math.max(existing.confidence_score, incoming.confidence_score),
   };
 }
+
+export function getThinRecordReasons(record: NormalizedCryptoRecord) {
+  const reasons: string[] = [];
+  if (!record.website_url) reasons.push("missing website");
+  if (!record.symbol) reasons.push("missing symbol");
+  if (!record.category) reasons.push("missing category");
+  if (!record.source_url) reasons.push("missing source url");
+  if (!record.launch_date && record.status !== "listed") reasons.push("missing launch date");
+  return reasons;
+}
+
+export function getRecordHealth(record: NormalizedCryptoRecord) {
+  const reasons = getThinRecordReasons(record);
+  if (reasons.length <= 1 && record.confidence_score >= 0.8) return { label: "Strong", reasons };
+  if (reasons.length <= 3 && record.confidence_score >= 0.6) return { label: "Okay", reasons };
+  return { label: "Thin", reasons };
+}
