@@ -52,7 +52,25 @@ async function main() {
 
   const supabase = createClient(url, key);
   const records = loadJson<NormalizedCryptoRecord[]>("data/imports/universe-merged.json");
-  const rows = records.map(mapRecordToRow);
+  const dedupedBySlug = new Map<string, ReturnType<typeof mapRecordToRow>>();
+
+  for (const record of records) {
+    const row = mapRecordToRow(record);
+    const key = row.slug;
+    if (!key) continue;
+    if (!dedupedBySlug.has(key)) {
+      dedupedBySlug.set(key, row);
+    } else {
+      const existing = dedupedBySlug.get(key)!;
+      dedupedBySlug.set(key, {
+        ...existing,
+        ...row,
+        tags: Array.from(new Set([...(existing.tags || []), ...(row.tags || [])])),
+      });
+    }
+  }
+
+  const rows = Array.from(dedupedBySlug.values());
 
   const chunkSize = 100;
   for (let i = 0; i < rows.length; i += chunkSize) {
