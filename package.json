@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest"
+    "test": "vitest",
+    "import:coingecko": "node --experimental-strip-types ./scripts/import-coingecko.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
