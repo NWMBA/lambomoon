@@ -1,0 +1,183 @@
+[
+  {
+    "source": "coingecko",
+    "source_url": "https://www.coingecko.com/en/coins/bitcoin",
+    "coingecko_id": "bitcoin",
+    "name": "Bitcoin",
+    "symbol": "BTC",
+    "slug": "bitcoin",
+    "status": "listed",
+    "first_seen_at": "2026-03-24T15:36:01.341Z",
+    "confidence_score": 1,
+    "market": {
+      "price_usd": 69897,
+      "market_cap": 1397613807614,
+      "fdv": 1397613807614,
+      "volume_24h": 39485335112,
+      "price_change_24h": -1.23034,
+      "price_change_7d": -5.115464315683109,
+      "market_cap_rank": 1,
+      "circulating_supply": 20003043,
+      "total_supply": 20003043,
+      "max_supply": 21000000
+    }
+  },
+  {
+    "source": "coingecko",
+    "source_url": "https://www.coingecko.com/en/coins/binancecoin",
+    "coingecko_id": "binancecoin",
+    "name": "BNB",
+    "symbol": "BNB",
+    "slug": "bnb",
+    "status": "listed",
+    "first_seen_at": "2026-03-24T15:36:01.342Z",
+    "confidence_score": 1,
+    "market": {
+      "price_usd": 630.99,
+      "market_cap": 86000755153,
+      "fdv": 86000755153,
+      "volume_24h": 1178616678,
+      "price_change_24h": -1.65246,
+      "price_change_7d": -5.184065893961504,
+      "market_cap_rank": 5,
+      "circulating_supply": 136357469.55,
+      "total_supply": 136357451.84,
+      "max_supply": 200000000
+    }
+  },
+  {
+    "source": "coingecko",
+    "source_url": "https://www.coingecko.com/en/coins/ethereum",
+    "coingecko_id": "ethereum",
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "slug": "ethereum",
+    "status": "listed",
+    "first_seen_at": "2026-03-24T15:36:01.341Z",
+    "confidence_score": 1,
+    "market": {
+      "price_usd": 2135.43,
+      "market_cap": 257526390638,
+      "fdv": 257526390638,
+      "volume_24h": 18916707642,
+      "price_change_24h": -0.99851,
+      "price_change_7d": -8.350864628647523,
+      "market_cap_rank": 2,
+      "circulating_supply": 120691566.1589812,
+      "total_supply": 120691566.1589812,
+      "max_supply": null
+    }
+  },
+  {
+    "source": "coingecko",
+    "source_url": "https://www.coingecko.com/en/coins/tether",
+    "coingecko_id": "tether",
+    "name": "Tether",
+    "symbol": "USDT",
+    "slug": "tether",
+    "status": "listed",
+    "first_seen_at": "2026-03-24T15:36:01.342Z",
+    "confidence_score": 1,
+    "market": {
+      "price_usd": 0.99975,
+      "market_cap": 184183156418,
+      "fdv": 189648749244,
+      "volume_24h": 67374705485,
+      "price_change_24h": -0.00037,
+      "price_change_7d": -0.033234740603853064,
+      "market_cap_rank": 3,
+      "circulating_supply": 184228518668.2984,
+      "total_supply": 189695457608.8262,
+      "max_supply": null
+    }
+  },
+  {
+    "source": "coingecko",
+    "source_url": "https://www.coingecko.com/en/coins/ripple",
+    "coingecko_id": "ripple",
+    "name": "XRP",
+    "symbol": "XRP",
+    "slug": "xrp",
+    "status": "listed",
+    "first_seen_at": "2026-03-24T15:36:01.342Z",
+    "confidence_score": 1,
+    "market": {
+      "price_usd": 1.4,
+      "market_cap": 86140004377,
+      "fdv": 140399815534,
+      "volume_24h": 2347444153,
+      "price_change_24h": -3.3103,
+      "price_change_7d": -6.591112419565566,
+      "market_cap_rank": 4,
+      "circulating_supply": 61344583754,
+      "total_supply": 99985695443,
+      "max_supply": 100000000000
+    }
+  },
+  {
+    "source": "cryptorank",
+    "source_url": "https://cryptorank.io/",
+    "coingecko_id": null,
+    "name": "Initia",
+    "symbol": "INIT",
+    "slug": "initia",
+    "status": "prelaunch",
+    "category": "Infrastructure",
+    "ecosystem": "Cosmos",
+    "tags": [
+      "upcoming",
+      "appchain",
+      "modular"
+    ],
+    "website_url": "https://initia.xyz",
+    "x_url": "https://x.com/initia",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:38:38.386Z",
+    "confidence_score": 0.8,
+    "notes": "Appchain-focused project with upcoming-token watch potential."
+  },
+  {
+    "source": "cryptorank",
+    "source_url": "https://cryptorank.io/",
+    "coingecko_id": null,
+    "name": "MegaETH",
+    "symbol": "MEGA",
+    "slug": "megaeth",
+    "status": "prelaunch",
+    "category": "L2",
+    "ecosystem": "Ethereum",
+    "tags": [
+      "upcoming",
+      "scaling",
+      "high-throughput"
+    ],
+    "website_url": "https://megaeth.com",
+    "x_url": "https://x.com/megaeth_labs",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:38:38.386Z",
+    "confidence_score": 0.8,
+    "notes": "Monitor as an upcoming Ethereum scaling narrative project."
+  },
+  {
+    "source": "cryptorank",
+    "source_url": "https://cryptorank.io/",
+    "coingecko_id": null,
+    "name": "Monad",
+    "symbol": "MON",
+    "slug": "monad",
+    "status": "prelaunch",
+    "category": "L1",
+    "ecosystem": "EVM",
+    "tags": [
+      "upcoming",
+      "parallel-execution",
+      "high-performance"
+    ],
+    "website_url": "https://monad.xyz",
+    "x_url": "https://x.com/monad_xyz",
+    "launch_date": null,
+    "first_seen_at": "2026-03-24T15:38:38.386Z",
+    "confidence_score": 0.8,
+    "notes": "High-attention next-gen L1 to monitor for token launch / ecosystem growth."
+  }
+]

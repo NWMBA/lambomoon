@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Monad",
+    "symbol": "MON",
+    "website_url": "https://monad.xyz",
+    "x_url": "https://x.com/monad_xyz",
+    "category": "L1",
+    "ecosystem": "EVM",
+    "tags": ["upcoming", "parallel-execution", "high-performance"],
+    "launch_date": null,
+    "notes": "High-attention next-gen L1 to monitor for token launch / ecosystem growth.",
+    "source_url": "https://cryptorank.io/"
+  },
+  {
+    "name": "MegaETH",
+    "symbol": "MEGA",
+    "website_url": "https://megaeth.com",
+    "x_url": "https://x.com/megaeth_labs",
+    "category": "L2",
+    "ecosystem": "Ethereum",
+    "tags": ["upcoming", "scaling", "high-throughput"],
+    "launch_date": null,
+    "notes": "Monitor as an upcoming Ethereum scaling narrative project.",
+    "source_url": "https://cryptorank.io/"
+  },
+  {
+    "name": "Initia",
+    "symbol": "INIT",
+    "website_url": "https://initia.xyz",
+    "x_url": "https://x.com/initia",
+    "category": "Infrastructure",
+    "ecosystem": "Cosmos",
+    "tags": ["upcoming", "appchain", "modular"],
+    "launch_date": null,
+    "notes": "Appchain-focused project with upcoming-token watch potential.",
+    "source_url": "https://cryptorank.io/"
+  }
+]
