@@ -309,13 +309,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Biggest Movers Section */}
-      <BiggestMovers limit={6} />
-
       {/* Trending Alpha Section */}
       <section id="trending">
         <TrendingAlpha />
       </section>
+
+      {/* Biggest Movers Section */}
+      <BiggestMovers limit={6} />
 
       {/* Projects Grid */}
       <section id="categories" className="py-16">
