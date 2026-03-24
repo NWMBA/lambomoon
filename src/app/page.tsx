@@ -100,6 +100,15 @@ function getBoostMilestone(count: number) {
   return "🌱 Early";
 }
 
+function getProjectBadge(project: Project, index?: number) {
+  if ((index ?? 99) < 3) return "🔥 Trending";
+  if (project.upvotes >= 400) return "🚀 Community Favorite";
+  const ageDays = (Date.now() - new Date(project.launch_date).getTime()) / (1000 * 60 * 60 * 24);
+  if (ageDays <= 30) return "✨ Fresh";
+  if ((project.change_24h || 0) >= 5) return "📈 Rising";
+  return getBoostMilestone(project.upvotes);
+}
+
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -238,6 +247,10 @@ export default function Home() {
     return getTrendingScore(b) - getTrendingScore(a);
   });
 
+  const trendingNow = [...projects].sort((a, b) => getTrendingScore(b) - getTrendingScore(a)).slice(0, 3);
+  const mostBoosted = [...projects].sort((a, b) => b.upvotes - a.upvotes).slice(0, 3);
+  const newlyAdded = [...projects].sort((a, b) => new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime()).slice(0, 3);
+
   return (
     <div className="min-h-screen">
       {/* Crypto Price Ticker */}
@@ -312,6 +325,76 @@ export default function Home() {
       {/* Trending Alpha Section */}
       <section id="trending">
         <TrendingAlpha />
+      </section>
+
+      {/* Curated Discovery Sections */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="bg-card/50 border-border/50">
+              <CardHeader>
+                <CardTitle>🔥 Trending Now</CardTitle>
+                <CardDescription>Fresh momentum from the community</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {trendingNow.map((project, index) => (
+                  <Link key={project.id} href={`/project/${project.id}`} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">{project.name}</span>
+                      <span className="text-xs text-amber-400">{getProjectBadge(project, index)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{project.symbol}</span>
+                      <span>🚀 {project.upvotes}</span>
+                    </div>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 border-border/50">
+              <CardHeader>
+                <CardTitle>🚀 Most Boosted</CardTitle>
+                <CardDescription>Community conviction leaders</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {mostBoosted.map((project) => (
+                  <Link key={project.id} href={`/project/${project.id}`} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">{project.name}</span>
+                      <span className="text-xs text-amber-400">{getBoostMilestone(project.upvotes)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{project.symbol}</span>
+                      <span>🚀 {project.upvotes}</span>
+                    </div>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 border-border/50">
+              <CardHeader>
+                <CardTitle>✨ Newly Added</CardTitle>
+                <CardDescription>Fresh projects entering the radar</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {newlyAdded.map((project) => (
+                  <Link key={project.id} href={`/project/${project.id}`} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">{project.name}</span>
+                      <span className="text-xs text-amber-400">{getProjectBadge(project)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{new Date(project.launch_date).toLocaleDateString()}</span>
+                      <span>{project.category}</span>
+                    </div>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </section>
 
       {/* Biggest Movers Section */}
@@ -417,7 +500,10 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
-                  <p className="text-xs text-amber-400 mb-4">{getBoostMilestone(project.upvotes)}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs text-amber-400">{getBoostMilestone(project.upvotes)}</p>
+                    <p className="text-xs text-primary">{getProjectBadge(project, index)}</p>
+                  </div>
                   <div className="flex gap-2">
                     <Link href={`/project/${project.id}`} className="flex-1">
                       <Button size="sm" className="w-full bg-primary hover:bg-primary/90">View Details</Button>
