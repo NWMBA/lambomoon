@@ -112,3 +112,33 @@ CREATE POLICY "Users manage own votes" ON crypto_votes FOR ALL USING (auth.uid()
 - `src/app/profile/page.tsx` - Profile editor
 - `src/app/dashboard/page.tsx` - User dashboard
 - `supabase/migrations/001_initial_schema.sql` - Full schema (use ALTER version above)
+---
+
+## Update - 2026-03-24
+
+### Newly Completed
+- Global shared navbar deployed across pages
+- Homepage curation pass completed
+- Detail pages made more editorial
+- Boost system added (replacing upvote wording)
+- Dashboard improved with tracked crypto market data
+- Ingestion scaffolding created:
+  - CoinGecko import
+  - CryptoRank upcoming adapter
+  - CoinLaunch adapter
+  - manual watchlist adapter
+  - merge pipeline
+- Import-to-database mapping prepared
+- Re-entry SQL batch checklist prepared
+
+### Pending Supabase Batch
+Run when back at computer:
+- `supabase/migrations/003_profile_socials.sql`
+- `supabase/migrations/004_crypto_comments.sql`
+- `supabase/migrations/005_crypto_ingest_fields.sql`
+
+### Ready After SQL
+- profile avatars + socials
+- crypto comments
+- import merged universe into `cryptos`
+- verify full import pipeline
