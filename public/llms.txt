@@ -1,0 +1,25 @@
+# LamboMoon
+
+LamboMoon is a community-curated crypto discovery site.
+
+Core ideas:
+- index broadly
+- curate selectively
+- boost the best
+- focus on fresh and upcoming crypto opportunities
+
+Key URLs:
+- Homepage: https://www.lambomoon.io/
+- Trending: https://www.lambomoon.io/trending
+- Movers: https://www.lambomoon.io/movers
+- About: https://www.lambomoon.io/about
+- Project detail pages: https://www.lambomoon.io/project/<id>
+
+Machine-friendly endpoints:
+- Trending projects JSON: https://www.lambomoon.io/api/projects/trending
+- Upcoming projects JSON: https://www.lambomoon.io/api/projects/upcoming
+
+Interpretation notes:
+- "Boost" means a positive community signal.
+- Projects may be listed, fresh, upcoming, prelaunch, or watching.
+- LamboMoon combines market context with community conviction.
