@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [trackedCryptos, setTrackedCryptos] = useState<any[]>([]);
-  const [votes, setVotes] = useState<any[]>([]);
+  const [upvotes, setUpvotes] = useState<any[]>([]);
   const [marketData, setMarketData] = useState<Record<string, { usd?: number; usd_24h_change?: number }>>({});
 
   async function fetchDashboardData(userId: string) {
@@ -40,23 +40,16 @@ export default function DashboardPage() {
       setMarketData({});
     }
 
-    // Fetch votes
-    const { data: userVotes } = await supabase
-      .from("crypto_votes")
-      .select(`
-        *,
-        cryptos (
-          name,
-          symbol,
-          logo_url
-        )
-      `)
+    // Fetch recent upvotes
+    const { data: recentUpvotes } = await supabase
+      .from("crypto_upvotes")
+      .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(10);
 
     setTrackedCryptos(tracked || []);
-    setVotes(userVotes || []);
+    setUpvotes(recentUpvotes || []);
     setLoading(false);
   }
 
@@ -200,30 +193,27 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Recent Votes */}
+        {/* Recent Upvotes */}
         <section>
-          <h2 className="text-xl font-semibold mb-4">Recent Votes</h2>
+          <h2 className="text-xl font-semibold mb-4">Recent Upvotes</h2>
           
-          {votes.length === 0 ? (
-            <p className="text-muted-foreground">You haven't voted on any cryptos yet</p>
+          {upvotes.length === 0 ? (
+            <p className="text-muted-foreground">You haven't upvoted any cryptos yet</p>
           ) : (
             <div className="space-y-2">
-              {votes.map((vote) => (
+              {upvotes.map((vote) => (
                 <div 
                   key={vote.id}
                   className="flex items-center justify-between bg-card rounded-lg p-4 border border-border"
                 >
                   <div className="flex items-center gap-4">
-                    <span className={vote.vote_type === "up" ? "text-green-400" : "text-red-400"}>
-                      {vote.vote_type === "up" ? "👍" : "👎"}
-                    </span>
+                    <span className="text-green-400">👍</span>
                     <Link 
-                      href={`/project/${vote.cryptos?.coingecko_id}`}
-                      className="font-medium hover:text-primary"
+                      href={`/project/${vote.coingecko_id}`}
+                      className="font-medium hover:text-primary capitalize"
                     >
-                      {vote.cryptos?.name}
+                      {String(vote.coingecko_id).replace(/-/g, " ")}
                     </Link>
-                    <span className="text-muted-foreground">({vote.cryptos?.symbol})</span>
                   </div>
                   <span className="text-sm text-muted-foreground">
                     {new Date(vote.created_at).toLocaleDateString()}

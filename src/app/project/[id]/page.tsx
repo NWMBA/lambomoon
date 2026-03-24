@@ -48,19 +48,47 @@ export default function ProjectDetailPage() {
   const [user, setUser] = useState<any>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingLoading, setTrackingLoading] = useState(false);
+  const [upvoteCount, setUpvoteCount] = useState(0);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
+  const [upvoteLoading, setUpvoteLoading] = useState(false);
+
+  async function refreshSocial(userId?: string) {
+    const { count } = await supabase
+      .from("crypto_upvotes")
+      .select("id", { count: "exact", head: true })
+      .eq("coingecko_id", coinId);
+    setUpvoteCount(count || 0);
+
+    if (userId) {
+      const { data: tracked } = await supabase
+        .from("tracked_cryptos")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("coingecko_id", coinId)
+        .maybeSingle();
+      setIsTracking(!!tracked);
+
+      const { data: upvoted } = await supabase
+        .from("crypto_upvotes")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("coingecko_id", coinId)
+        .maybeSingle();
+      setHasUpvoted(!!upvoted);
+    } else {
+      setIsTracking(false);
+      setHasUpvoted(false);
+    }
+  }
 
   useEffect(() => {
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
-        const { data } = await supabase
-          .from("tracked_cryptos")
-          .select("id")
-          .eq("user_id", session.user.id)
-          .eq("coingecko_id", coinId)
-          .maybeSingle();
-        setIsTracking(!!data);
+        await refreshSocial(session.user.id);
+      } else {
+        await refreshSocial();
       }
     };
     initAuth();
@@ -109,6 +137,33 @@ export default function ProjectDetailPage() {
     }
   }
 
+  async function toggleUpvote() {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setUpvoteLoading(true);
+    try {
+      if (hasUpvoted) {
+        await supabase
+          .from("crypto_upvotes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("coingecko_id", coinId);
+        setHasUpvoted(false);
+        setUpvoteCount((v) => Math.max(0, v - 1));
+      } else {
+        await supabase
+          .from("crypto_upvotes")
+          .insert({ user_id: user.id, coingecko_id: coinId });
+        setHasUpvoted(true);
+        setUpvoteCount((v) => v + 1);
+      }
+    } finally {
+      setUpvoteLoading(false);
+    }
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading coin…</p></div>;
   }
@@ -151,13 +206,22 @@ export default function ProjectDetailPage() {
               </span>
               <span className="text-sm text-muted-foreground">24h</span>
             </div>
-            <Button
-              onClick={toggleTrack}
-              disabled={trackingLoading}
-              className={isTracking ? "bg-green-600 hover:bg-green-700" : "bg-yellow-500 hover:bg-yellow-600 text-black"}
-            >
-              {trackingLoading ? "…" : isTracking ? "✓ Tracked" : "Track"}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={toggleUpvote}
+                disabled={upvoteLoading}
+                className={hasUpvoted ? "bg-green-600 hover:bg-green-700" : "bg-primary hover:bg-primary/90"}
+              >
+                {upvoteLoading ? "…" : hasUpvoted ? `👍 Upvoted (${upvoteCount})` : `👍 Upvote (${upvoteCount})`}
+              </Button>
+              <Button
+                onClick={toggleTrack}
+                disabled={trackingLoading}
+                className={isTracking ? "bg-green-600 hover:bg-green-700" : "bg-yellow-500 hover:bg-yellow-600 text-black"}
+              >
+                {trackingLoading ? "…" : isTracking ? "✓ Tracked" : "Track"}
+              </Button>
+            </div>
           </div>
         </div>
 

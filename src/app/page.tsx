@@ -86,6 +86,12 @@ const howItWorks = [
 // CoinGecko API - free tier: 10-30 calls/minute
 const COINGECKO_API = "https://api.coingecko.com/api/v3";
 
+function getTrendingScore(project: Project) {
+  const ageInHours = Math.max(1, (Date.now() - new Date(project.launch_date).getTime()) / (1000 * 60 * 60));
+  const gravity = 1.5;
+  return project.upvotes / Math.pow(ageInHours + 2, gravity);
+}
+
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -150,12 +156,22 @@ export default function Home() {
         if (!response.ok) throw new Error("Failed to fetch");
         
         const { prices } = await response.json();
+
+        let upvoteCounts: Record<string, number> = {};
+        try {
+          const { data: upvoteRows } = await supabase.from("crypto_upvotes").select("coingecko_id");
+          upvoteCounts = (upvoteRows || []).reduce((acc: Record<string, number>, row: any) => {
+            if (row.coingecko_id) acc[row.coingecko_id] = (acc[row.coingecko_id] || 0) + 1;
+            return acc;
+          }, {});
+        } catch {}
         
-        // Update projects with live data
+        // Update projects with live data and live upvote counts (fallback to seed values)
         const updated = seedProjects.map(project => ({
           ...project,
           current_price: prices[project.id]?.usd || 0,
           change_24h: prices[project.id]?.usd_24h_change || 0,
+          upvotes: upvoteCounts[project.id] ?? project.upvotes,
         }));
         
         setProjects(updated);
@@ -183,9 +199,9 @@ export default function Home() {
     });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    if (sortBy === 'newest') return new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime()
-    if (sortBy === 'top') return b.upvotes - a.upvotes
-    return (b.change_24h || 0) - (a.change_24h || 0) // trending
+    if (sortBy === 'newest') return new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime();
+    if (sortBy === 'top') return b.upvotes - a.upvotes;
+    return getTrendingScore(b) - getTrendingScore(a);
   });
 
   return (
@@ -357,8 +373,9 @@ export default function Home() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">{project.category}</span>
+                      <span className="text-xs text-muted-foreground">⬆ {project.upvotes}</span>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
                       <span className="text-sm font-medium">${project.current_price?.toFixed(2) || '0.00'}</span>
                       <span className={`text-sm font-medium ${project.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {project.change_24h >= 0 ? '+' : ''}{project.change_24h?.toFixed(1) || '0.0'}%
