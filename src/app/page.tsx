@@ -272,16 +272,16 @@ export default function Home() {
           {/* Stats */}
           <div className="flex justify-center gap-8 mb-8 flex-wrap">
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">2,500+</div>
-              <div className="text-sm text-muted-foreground">Projects Tracked</div>
+              <div className="text-3xl font-bold text-foreground">Thousands</div>
+              <div className="text-sm text-muted-foreground">Cryptos Indexed</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">150K+</div>
-              <div className="text-sm text-muted-foreground">Community Members</div>
+              <div className="text-3xl font-bold text-foreground">Boost</div>
+              <div className="text-sm text-muted-foreground">Driven Discovery</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-400">$4.2B</div>
-              <div className="text-sm text-muted-foreground">Market Cap Discovered</div>
+              <div className="text-3xl font-bold text-green-400">Fresh</div>
+              <div className="text-sm text-muted-foreground">New + Upcoming Tokens</div>
             </div>
           </div>
           
