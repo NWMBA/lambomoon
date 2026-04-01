@@ -42,6 +42,15 @@ function mapRecordToRow(record: NormalizedCryptoRecord) {
   };
 }
 
+function inferListingTier(row: ReturnType<typeof mapRecordToRow>) {
+  const status = (row.status || "").toLowerCase();
+  const rank = row.market_cap_rank ?? Number.POSITIVE_INFINITY;
+  if (status !== "listed") return "prelaunch";
+  if (rank <= 20) return "major";
+  if (rank <= 100) return "midcap";
+  return "emerging";
+}
+
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -72,9 +81,37 @@ async function main() {
 
   const rows = Array.from(dedupedBySlug.values());
 
+  const existingRowsBySlug = new Map<string, any>();
+  const existingRowsByCoinGeckoId = new Map<string, any>();
+  try {
+    const { data: existingRows } = await supabase
+      .from("cryptos")
+      .select("slug,coingecko_id,is_featured,is_discoverable,is_hidden,listing_tier");
+
+    for (const row of existingRows || []) {
+      if (row.slug) existingRowsBySlug.set(row.slug, row);
+      if (row.coingecko_id) existingRowsByCoinGeckoId.set(row.coingecko_id, row);
+    }
+  } catch (error) {
+    console.warn("Could not preload existing editorial fields; continuing with inferred defaults.");
+  }
+
+  const preparedRows = rows.map((row) => {
+    const existing = existingRowsBySlug.get(row.slug) || (row.coingecko_id ? existingRowsByCoinGeckoId.get(row.coingecko_id) : null);
+    const inferredTier = inferListingTier(row);
+
+    return {
+      ...row,
+      is_featured: existing?.is_featured ?? false,
+      is_discoverable: existing?.is_discoverable ?? inferredTier !== "major",
+      is_hidden: existing?.is_hidden ?? false,
+      listing_tier: existing?.listing_tier ?? inferredTier,
+    };
+  });
+
   const chunkSize = 100;
-  for (let i = 0; i < rows.length; i += chunkSize) {
-    const chunk = rows.slice(i, i + chunkSize);
+  for (let i = 0; i < preparedRows.length; i += chunkSize) {
+    const chunk = preparedRows.slice(i, i + chunkSize);
     const { error } = await supabase
       .from("cryptos")
       .upsert(chunk, { onConflict: "slug" });
@@ -87,7 +124,7 @@ async function main() {
     console.log(`Imported chunk ${i / chunkSize + 1}`);
   }
 
-  console.log(`Imported ${rows.length} crypto records into Supabase.`);
+  console.log(`Imported ${preparedRows.length} crypto records into Supabase.`);
 }
 
 main().catch((err) => {

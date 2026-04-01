@@ -94,13 +94,15 @@ function AlphaCard({ project, rank }: { project: Project; rank: number }) {
           {rank}
         </div>
         <span className="text-xs px-2 py-1 bg-[#2d2d4a] rounded-full text-gray-300">
-          {project.category}
+          {project.featured ? '⭐ Featured' : project.category}
         </span>
       </div>
 
       <h3 className="text-lg font-semibold text-white mb-1">{project.name}</h3>
       <p className="text-sm text-gray-400 mb-2">{project.symbol}</p>
-      <p className="text-xs text-[#ff6b35] mb-3 uppercase tracking-wide">{project.status || project.source || 'discovery'}</p>
+      <p className="text-xs text-[#ff6b35] mb-3 uppercase tracking-wide">
+        {project.featured ? `Featured • ${project.status || project.source || 'discovery'}` : project.status || project.source || 'discovery'}
+      </p>
 
       <div className="mb-2">
         <span className="text-xl font-bold text-white">{formatPrice(project.price)}</span>
@@ -181,7 +183,7 @@ export function TrendingAlpha({ limit = 6, showViewAll = true }: TrendingAlphaPr
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
           Trending Alpha 🔥
         </h2>
-        <p className="text-gray-400">Discovery-first projects from the LamboMoon radar</p>
+        <p className="text-gray-400">Featured and discovery-first projects from the LamboMoon radar</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

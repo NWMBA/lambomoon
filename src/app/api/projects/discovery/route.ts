@@ -53,7 +53,7 @@ export async function GET() {
     market_cap: record.market_cap || 0,
     launch_date: record.launch_date || record.first_seen_at || new Date().toISOString(),
     upvotes: 0,
-    featured: (record.source || "").toLowerCase() === "manual",
+    featured: Boolean(record.is_featured) || (record.source || "").toLowerCase() === "manual",
     source: getSourceLabel(record),
     status: getStatusLabel(record),
   }));
