@@ -238,7 +238,7 @@ export default function Home() {
         try {
           const { data: importedRows } = await supabase
             .from("cryptos")
-            .select("coingecko_id,name,symbol,slug,status,source,category,ecosystem,tags,notes,launch_date,first_seen_at,confidence_score,price_change_24h,price_usd,market_cap,market_cap_rank")
+            .select("coingecko_id,name,symbol,slug,status,source,category,ecosystem,tags,notes,launch_date,first_seen_at,confidence_score,price_change_24h,price_usd,market_cap,market_cap_rank,is_featured,is_discoverable,is_hidden,listing_tier")
             .limit(500);
 
           if (importedRows && importedRows.length > 0) {

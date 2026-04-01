@@ -21,7 +21,7 @@ export async function GET() {
   const supabase = createClient(url, key);
   const { data, error } = await supabase
     .from("cryptos")
-    .select("coingecko_id,name,symbol,slug,status,source,category,ecosystem,tags,website_url,x_url,telegram_url,discord_url,docs_url,source_url,launch_date,first_seen_at,confidence_score,price_usd,market_cap,price_change_24h,market_cap_rank,notes")
+    .select("coingecko_id,name,symbol,slug,status,source,category,ecosystem,tags,website_url,x_url,telegram_url,discord_url,docs_url,source_url,launch_date,first_seen_at,confidence_score,price_usd,market_cap,price_change_24h,market_cap_rank,notes,is_featured,is_discoverable,is_hidden,listing_tier")
     .limit(500);
 
   if (error || !data) {

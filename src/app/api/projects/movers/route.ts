@@ -13,7 +13,7 @@ export async function GET() {
   const supabase = createClient(url, key);
   const { data, error } = await supabase
     .from("cryptos")
-    .select("coingecko_id,name,symbol,slug,status,category,price_usd,market_cap,price_change_24h,market_cap_rank")
+    .select("coingecko_id,name,symbol,slug,status,category,price_usd,market_cap,price_change_24h,market_cap_rank,is_hidden,listing_tier")
     .eq("status", "listed")
     .not("price_change_24h", "is", null)
     .limit(500);

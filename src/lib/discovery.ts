@@ -23,6 +23,10 @@ export type CryptoRow = {
   price_change_24h?: number | null;
   market_cap_rank?: number | null;
   notes?: string | null;
+  is_featured?: boolean | null;
+  is_discoverable?: boolean | null;
+  is_hidden?: boolean | null;
+  listing_tier?: "major" | "midcap" | "emerging" | "prelaunch" | string | null;
 };
 
 const MAJOR_IDS = new Set([
@@ -56,14 +60,30 @@ const MAJOR_SYMBOLS = new Set([
 const DISCOVERY_STATUSES = new Set(["upcoming", "prelaunch", "watching", "airdrop", "testnet"]);
 const DISCOVERY_SOURCES = new Set(["manual", "scout", "cryptorank", "coinlaunch"]);
 
+export function getListingTier(record: CryptoRow) {
+  const explicitTier = record.listing_tier?.toLowerCase();
+  if (explicitTier === "major" || explicitTier === "midcap" || explicitTier === "emerging" || explicitTier === "prelaunch") {
+    return explicitTier;
+  }
+
+  const status = (record.status || "").toLowerCase();
+  const rank = record.market_cap_rank ?? Number.POSITIVE_INFINITY;
+  if (status !== "listed") return "prelaunch";
+  if (rank <= 20) return "major";
+  if (rank <= 100) return "midcap";
+  return "emerging";
+}
+
 export function isMajorOrStable(record: CryptoRow) {
   const id = record.coingecko_id?.toLowerCase();
   const symbol = record.symbol?.toUpperCase();
   const rank = record.market_cap_rank ?? Number.POSITIVE_INFINITY;
+  const tier = getListingTier(record);
 
   return Boolean(
     (id && MAJOR_IDS.has(id)) ||
     (symbol && MAJOR_SYMBOLS.has(symbol)) ||
+    tier === "major" ||
     rank <= 20
   );
 }
@@ -79,11 +99,17 @@ export function getRecordHealth(record: CryptoRow) {
 }
 
 export function isDiscoveryEligible(record: CryptoRow) {
+  if (record.is_hidden) return false;
+  if (record.is_discoverable === false) return false;
+  if (record.is_featured) return true;
+
   const status = (record.status || "").toLowerCase();
   const source = (record.source || "").toLowerCase();
+  const tier = getListingTier(record);
 
   if (DISCOVERY_SOURCES.has(source)) return true;
   if (DISCOVERY_STATUSES.has(status)) return true;
+  if (tier === "emerging" && !isMajorOrStable(record)) return true;
   return false;
 }
 
@@ -97,6 +123,7 @@ export function discoveryScore(record: CryptoRow) {
   const daysUntilLaunch = launchDate ? (launchDate - now) / (1000 * 60 * 60 * 24) : null;
 
   let score = 0;
+  if (record.is_featured) score += 120;
   if (source === "manual" || source === "scout") score += 100;
   if (status === "watching") score += 65;
   if (status === "upcoming") score += 60;
@@ -134,11 +161,17 @@ export function isMarketEligible(record: CryptoRow) {
 }
 
 export function isStrongFallbackDiscovery(record: CryptoRow) {
+  if (record.is_hidden) return false;
+  if (record.is_discoverable === false) return false;
+  if (record.is_featured) return true;
+
   const status = (record.status || "").toLowerCase();
   const rank = record.market_cap_rank ?? Number.POSITIVE_INFINITY;
   const category = (record.category || record.ecosystem || "").trim();
+  const tier = getListingTier(record);
 
   if (status !== "listed") return false;
+  if (tier !== "emerging") return false;
   if (rank <= 20 || rank > 300) return false;
   if (!category || category.toLowerCase() === "uncategorized") return false;
   if (getRecordHealth(record) < 3) return false;
