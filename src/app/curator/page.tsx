@@ -1,122 +1,208 @@
-import Link from "next/link";
-import { readFileSync } from "fs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getRecordHealth } from "@/lib/ingest/normalize";
+"use client";
 
-type UniverseRecord = {
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+type CurationProject = {
+  coingecko_id?: string | null;
   name: string;
-  symbol?: string;
+  symbol?: string | null;
   slug: string;
-  status: string;
-  source: string;
-  category?: string;
-  ecosystem?: string;
-  confidence_score: number;
-  website_url?: string;
-  x_url?: string;
+  status?: string | null;
+  source?: string | null;
+  category?: string | null;
+  ecosystem?: string | null;
+  confidence_score?: number | null;
   launch_date?: string | null;
-  notes?: string;
+  website_url?: string | null;
+  x_url?: string | null;
+  is_featured?: boolean | null;
+  is_discoverable?: boolean | null;
+  is_hidden?: boolean | null;
+  listing_tier?: string | null;
+  notes?: string | null;
+  market_cap_rank?: number | null;
 };
 
-function loadUniverse(): UniverseRecord[] {
-  try {
-    const raw = readFileSync(process.cwd() + "/data/imports/universe-merged.json", "utf8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function getHealthColor(label: string) {
-  if (label === "Strong") return "text-green-400";
-  if (label === "Okay") return "text-yellow-400";
-  return "text-red-400";
-}
+const listingTierOptions = ["prelaunch", "emerging", "midcap", "major"];
 
 export default function CuratorPage() {
-  const universe = loadUniverse();
-  const strong = universe.filter((r) => getRecordHealth(r as any).label === "Strong").length;
-  const thin = universe.filter((r) => getRecordHealth(r as any).label === "Thin").length;
+  const [projects, setProjects] = useState<CurationProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [savingSlug, setSavingSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const response = await fetch("/api/projects/curation");
+        const data = await response.json();
+        setProjects(data.projects || []);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  async function patchProject(slug: string, patch: Partial<CurationProject>) {
+    setSavingSlug(slug);
+    try {
+      const response = await fetch("/api/projects/curation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, ...patch }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to save curation settings");
+      setProjects((prev) => prev.map((project) => (project.slug === slug ? data.project : project)));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSavingSlug(null);
+    }
+  }
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return projects;
+    return projects.filter((project) =>
+      [project.name, project.symbol, project.slug, project.category, project.source, project.listing_tier]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q))
+    );
+  }, [projects, query]);
+
+  const featured = projects.filter((p) => p.is_featured).length;
+  const hidden = projects.filter((p) => p.is_hidden).length;
+  const discoverable = projects.filter((p) => p.is_discoverable !== false && !p.is_hidden).length;
 
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Curator Preview</h1>
-            <p className="text-muted-foreground mt-2">Inspect the merged crypto universe before deeper import and curation.</p>
+            <h1 className="text-3xl font-bold">Curator Controls</h1>
+            <p className="text-muted-foreground mt-2">Review and edit featured, discoverable, hidden, and listing-tier settings directly from the indexed crypto universe.</p>
           </div>
           <Link href="/" className="text-primary hover:underline">← Back home</Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
           <Card>
-            <CardHeader><CardTitle>Total Records</CardTitle></CardHeader>
-            <CardContent className="text-3xl font-bold">{universe.length}</CardContent>
+            <CardHeader><CardTitle>Total Loaded</CardTitle></CardHeader>
+            <CardContent className="text-3xl font-bold">{projects.length}</CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Strong Records</CardTitle></CardHeader>
-            <CardContent className="text-3xl font-bold text-green-400">{strong}</CardContent>
+            <CardHeader><CardTitle>Featured</CardTitle></CardHeader>
+            <CardContent className="text-3xl font-bold text-amber-400">{featured}</CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Thin Records</CardTitle></CardHeader>
-            <CardContent className="text-3xl font-bold text-red-400">{thin}</CardContent>
+            <CardHeader><CardTitle>Discoverable</CardTitle></CardHeader>
+            <CardContent className="text-3xl font-bold text-green-400">{discoverable}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Hidden</CardTitle></CardHeader>
+            <CardContent className="text-3xl font-bold text-red-400">{hidden}</CardContent>
           </Card>
         </div>
 
-        <div className="space-y-4">
-          {universe.map((record) => {
-            const health = getRecordHealth(record as any);
-            return (
-              <Card key={`${record.source}-${record.slug}`}>
+        <div className="mb-6 max-w-md">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, symbol, slug, category..."
+          />
+        </div>
+
+        {loading ? (
+          <p className="text-muted-foreground">Loading curator data…</p>
+        ) : (
+          <div className="space-y-4">
+            {filtered.map((project) => (
+              <Card key={project.slug}>
                 <CardContent className="p-4">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                    <div className="space-y-2">
+                  <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
+                    <div className="space-y-2 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-lg font-semibold">{record.name}</h2>
-                        {record.symbol && <span className="font-mono text-primary">{record.symbol}</span>}
-                        <span className={`text-xs ${getHealthColor(health.label)}`}>{health.label}</span>
+                        <h2 className="text-lg font-semibold">{project.name}</h2>
+                        {project.symbol && <span className="font-mono text-primary">{project.symbol}</span>}
+                        {project.is_featured ? <span className="text-xs px-2 py-1 rounded-full bg-amber-500/20 text-amber-400">Featured</span> : null}
+                        {project.is_hidden ? <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400">Hidden</span> : null}
                       </div>
                       <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{record.status}</span>
-                        <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{record.source}</span>
-                        {record.category && <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{record.category}</span>}
-                        {record.ecosystem && <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{record.ecosystem}</span>}
+                        {project.status && <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{project.status}</span>}
+                        {project.source && <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{project.source}</span>}
+                        {project.category && <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{project.category}</span>}
+                        {project.listing_tier && <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{project.listing_tier}</span>}
                       </div>
-                      {record.notes && <p className="text-sm text-muted-foreground">{record.notes}</p>}
-                      {health.reasons.length > 0 && (
-                        <p className="text-xs text-muted-foreground">Needs attention: {health.reasons.join(", ")}</p>
-                      )}
+                      {project.notes ? <p className="text-sm text-muted-foreground">{project.notes}</p> : null}
+                      <p className="text-xs text-muted-foreground">Slug: {project.slug}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm min-w-[320px]">
-                      <div>
-                        <p className="text-muted-foreground">Confidence</p>
-                        <p className="font-medium">{record.confidence_score}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Launch</p>
-                        <p className="font-medium">{record.launch_date ? new Date(record.launch_date).toLocaleDateString() : "TBD"}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Website</p>
-                        <p className="font-medium">{record.website_url ? "Yes" : "No"}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">X</p>
-                        <p className="font-medium">{record.x_url ? "Yes" : "No"}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Slug</p>
-                        <p className="font-medium">{record.slug}</p>
-                      </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 min-w-[340px] text-sm">
+                      <label className="flex flex-col gap-2">
+                        <span className="text-muted-foreground">Featured</span>
+                        <Button
+                          size="sm"
+                          variant={project.is_featured ? "default" : "outline"}
+                          className={project.is_featured ? "bg-amber-500 hover:bg-amber-600 text-black" : "border-border"}
+                          onClick={() => patchProject(project.slug, { is_featured: !project.is_featured })}
+                          disabled={savingSlug === project.slug}
+                        >
+                          {project.is_featured ? "Yes" : "No"}
+                        </Button>
+                      </label>
+
+                      <label className="flex flex-col gap-2">
+                        <span className="text-muted-foreground">Discoverable</span>
+                        <Button
+                          size="sm"
+                          variant={project.is_discoverable !== false ? "default" : "outline"}
+                          className={project.is_discoverable !== false ? "bg-green-600 hover:bg-green-700" : "border-border"}
+                          onClick={() => patchProject(project.slug, { is_discoverable: !(project.is_discoverable !== false) })}
+                          disabled={savingSlug === project.slug}
+                        >
+                          {project.is_discoverable !== false ? "Yes" : "No"}
+                        </Button>
+                      </label>
+
+                      <label className="flex flex-col gap-2">
+                        <span className="text-muted-foreground">Hidden</span>
+                        <Button
+                          size="sm"
+                          variant={project.is_hidden ? "default" : "outline"}
+                          className={project.is_hidden ? "bg-red-600 hover:bg-red-700" : "border-border"}
+                          onClick={() => patchProject(project.slug, { is_hidden: !project.is_hidden })}
+                          disabled={savingSlug === project.slug}
+                        >
+                          {project.is_hidden ? "Yes" : "No"}
+                        </Button>
+                      </label>
+
+                      <label className="flex flex-col gap-2">
+                        <span className="text-muted-foreground">Listing Tier</span>
+                        <select
+                          value={project.listing_tier || "emerging"}
+                          onChange={(e) => patchProject(project.slug, { listing_tier: e.target.value })}
+                          disabled={savingSlug === project.slug}
+                          className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                        >
+                          {listingTierOptions.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      </label>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
