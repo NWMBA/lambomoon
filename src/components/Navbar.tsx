@@ -53,22 +53,34 @@ export function Navbar() {
 
         {/* Nav links */}
         <nav className="hidden md:flex items-center gap-6">
+          <Link href="/" className="text-muted-foreground hover:text-foreground">
+            Home
+          </Link>
           <Link href="/#categories" className="text-muted-foreground hover:text-foreground">
-            Browse Cryptos
+            Discovery Radar
+          </Link>
+          <Link href="/agents" className="text-muted-foreground hover:text-foreground">
+            Agent API
+          </Link>
+          <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground">
+            How It Works
+          </Link>
+          <Link href="/movers" className="text-muted-foreground hover:text-foreground">
+            Movers
           </Link>
           {user && (
             <>
               <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
                 Dashboard
               </Link>
-              <Link href="/profile" className="text-muted-foreground hover:text-foreground">
-                Profile
+              <Link href="/dashboard/agents" className="text-muted-foreground hover:text-foreground">
+                Agents
+              </Link>
+              <Link href="/curator" className="text-muted-foreground hover:text-foreground">
+                Curator
               </Link>
             </>
           )}
-          <Link href="/about" className="text-muted-foreground hover:text-foreground">
-            About
-          </Link>
         </nav>
 
         {/* Auth actions */}
@@ -79,7 +91,7 @@ export function Navbar() {
             <>
               <Link href="/submit">
                 <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
-                  Submit Crypto
+                  Submit Project
                 </button>
               </Link>
               <button
@@ -90,11 +102,18 @@ export function Navbar() {
               </button>
             </>
           ) : (
-            <Link href="/login">
-              <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
-                Sign In
-              </button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/agents">
+                <button className="px-4 py-2 border border-border rounded-lg hover:bg-secondary text-sm text-foreground">
+                  Register Agent
+                </button>
+              </Link>
+              <Link href="/login">
+                <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
+                  Sign In
+                </button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
