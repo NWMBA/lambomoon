@@ -4,7 +4,10 @@ import {
   type CryptoRow,
   isDiscoveryEligible,
   isMajorOrStable,
+  isStrongFallbackDiscovery,
   sortDiscovery,
+  getSourceLabel,
+  getStatusLabel,
 } from "@/lib/discovery";
 
 export async function GET() {
@@ -28,11 +31,7 @@ export async function GET() {
   const allRows = (data as CryptoRow[]).filter((record) => !isMajorOrStable(record));
 
   const discoveryRows = allRows.filter(isDiscoveryEligible);
-  const fallbackListedRows = allRows.filter((record) => {
-    const status = (record.status || "").toLowerCase();
-    const rank = record.market_cap_rank ?? Number.POSITIVE_INFINITY;
-    return status === "listed" && rank > 20 && rank <= 300;
-  });
+  const fallbackListedRows = allRows.filter(isStrongFallbackDiscovery);
 
   const records = discoveryRows.length >= 6
     ? discoveryRows
@@ -55,8 +54,8 @@ export async function GET() {
     launch_date: record.launch_date || record.first_seen_at || new Date().toISOString(),
     upvotes: 0,
     featured: (record.source || "").toLowerCase() === "manual",
-    source: record.source || "unknown",
-    status: record.status || "watching",
+    source: getSourceLabel(record),
+    status: getStatusLabel(record),
   }));
 
   return NextResponse.json({

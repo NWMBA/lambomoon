@@ -10,7 +10,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import NewsTicker from "@/components/NewsTicker";
 import { TrendingAlpha } from "@/components/TrendingAlpha";
 import { BiggestMovers } from "@/components/BiggestMovers";
-import { type CryptoRow, isDiscoveryEligible, isMajorOrStable, matchesSearch, sortDiscovery } from "@/lib/discovery";
+import { type CryptoRow, isDiscoveryEligible, isMajorOrStable, matchesSearch, sortDiscovery, getSourceLabel, getStatusLabel, getProjectHref, hasProjectDetailPage } from "@/lib/discovery";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,6 +29,10 @@ type Project = CryptoRow & {
   upvotes: number;
   current_price?: number;
 };
+
+function projectKey(project: Project) {
+  return project.coingecko_id || project.id || project.slug || project.name;
+}
 
 const seedProjects: Project[] = [
   // AI & Agents
@@ -118,15 +122,6 @@ function getEditorialAngle(project: Project) {
   return "Steady signal with enough context to justify a closer look.";
 }
 
-function getSourceLabel(project: Project) {
-  return "CoinGecko + Community";
-}
-
-function getStatusLabel(project: Project) {
-  const ageDays = (Date.now() - new Date(project.launch_date).getTime()) / (1000 * 60 * 60 * 24);
-  if (ageDays <= 30) return "Fresh";
-  return "Listed";
-}
 
 export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -178,14 +173,23 @@ export default function Home() {
       return;
     }
 
-    const hasBoosted = boostedIds.includes(projectId);
+    const project = projects.find((item) => item.id === projectId);
+    const boostId = project?.coingecko_id || projectId;
+    if (!project?.coingecko_id) {
+      if (project?.website_url) {
+        window.open(project.website_url, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
+    const hasBoosted = boostedIds.includes(boostId);
     if (hasBoosted) {
-      await supabase.from("crypto_upvotes").delete().eq("user_id", user.id).eq("coingecko_id", projectId);
-      setBoostedIds((prev) => prev.filter((id) => id !== projectId));
+      await supabase.from("crypto_upvotes").delete().eq("user_id", user.id).eq("coingecko_id", boostId);
+      setBoostedIds((prev) => prev.filter((id) => id !== boostId));
       setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, upvotes: Math.max(0, p.upvotes - 1) } : p));
     } else {
-      await supabase.from("crypto_upvotes").insert({ user_id: user.id, coingecko_id: projectId });
-      setBoostedIds((prev) => [...prev, projectId]);
+      await supabase.from("crypto_upvotes").insert({ user_id: user.id, coingecko_id: boostId });
+      setBoostedIds((prev) => [...prev, boostId]);
       setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, upvotes: p.upvotes + 1 } : p));
     }
   }
@@ -301,9 +305,11 @@ export default function Home() {
     return sortDirection === 'asc' ? result : -result;
   });
 
-  const trendingNow = [...projects].sort((a, b) => getTrendingScore(b) - getTrendingScore(a)).slice(0, 3);
-  const mostBoosted = [...projects].sort((a, b) => b.upvotes - a.upvotes).slice(0, 3);
-  const newlyAdded = [...projects].sort((a, b) => new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime()).slice(0, 3);
+  const discoveryProjects = sortDiscovery(projects) as Project[];
+  const boostableProjects = projects.filter((project) => Boolean(project.coingecko_id));
+  const trendingNow = discoveryProjects.slice(0, 3);
+  const mostBoosted = [...boostableProjects].sort((a, b) => b.upvotes - a.upvotes).slice(0, 3);
+  const newlyAdded = [...discoveryProjects].sort((a, b) => new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime()).slice(0, 3);
 
   function toggleSort(column: 'name' | 'symbol' | 'category' | 'price' | 'change' | 'top' | 'newest') {
     if (sortBy === column) {
@@ -396,21 +402,29 @@ export default function Home() {
             <Card className="bg-card/50 border-border/50">
               <CardHeader>
                 <CardTitle>🔥 Trending Now</CardTitle>
-                <CardDescription>Fresh momentum from the community</CardDescription>
+                <CardDescription>Highest-conviction discovery picks right now</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {trendingNow.map((project, index) => (
-                  <Link key={project.id} href={`/project/${project.id}`} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium">{project.name}</span>
-                      <span className="text-xs text-amber-400">{getProjectBadge(project, index)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{project.symbol}</span>
-                      <span>🚀 {project.upvotes}</span>
-                    </div>
-                  </Link>
-                ))}
+                {trendingNow.map((project, index) => {
+                  const href = getProjectHref(project);
+                  const canOpenDetail = hasProjectDetailPage(project);
+                  const linkProps = canOpenDetail
+                    ? { href }
+                    : { href, target: '_blank', rel: 'noopener noreferrer' as const };
+
+                  return (
+                    <Link key={projectKey(project)} {...linkProps} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">{project.name}</span>
+                        <span className="text-xs text-amber-400">{getProjectBadge(project, index)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{project.symbol}</span>
+                        <span>{getStatusLabel(project)}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </CardContent>
             </Card>
 
@@ -421,7 +435,7 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {mostBoosted.map((project) => (
-                  <Link key={project.id} href={`/project/${project.id}`} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
+                  <Link key={projectKey(project)} href={getProjectHref(project)} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium">{project.name}</span>
                       <span className="text-xs text-amber-400">{getBoostMilestone(project.upvotes)}</span>
@@ -438,21 +452,29 @@ export default function Home() {
             <Card className="bg-card/50 border-border/50">
               <CardHeader>
                 <CardTitle>✨ Newly Added</CardTitle>
-                <CardDescription>Fresh projects entering the radar</CardDescription>
+                <CardDescription>Latest projects added to the discovery radar</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {newlyAdded.map((project) => (
-                  <Link key={project.id} href={`/project/${project.id}`} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium">{project.name}</span>
-                      <span className="text-xs text-amber-400">{getProjectBadge(project)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{new Date(project.launch_date).toLocaleDateString()}</span>
-                      <span>{project.category}</span>
-                    </div>
-                  </Link>
-                ))}
+                {newlyAdded.map((project) => {
+                  const href = getProjectHref(project);
+                  const canOpenDetail = hasProjectDetailPage(project);
+                  const linkProps = canOpenDetail
+                    ? { href }
+                    : { href, target: '_blank', rel: 'noopener noreferrer' as const };
+
+                  return (
+                    <Link key={projectKey(project)} {...linkProps} className="block rounded-lg border border-border/50 p-3 hover:border-primary/50 transition-colors">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">{project.name}</span>
+                        <span className="text-xs text-amber-400">{getStatusLabel(project)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{new Date(project.launch_date).toLocaleDateString()}</span>
+                        <span>{project.category}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </CardContent>
             </Card>
           </div>
@@ -485,7 +507,7 @@ export default function Home() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-3xl font-bold text-foreground">
-                {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "Browse Cryptos"}
+                {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "Browse Discovery Radar"}
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
                 {viewMode === 'table' ? 'Click table headers to sort.' : 'Use cards for scan mode, table for comparison mode.'}
@@ -556,16 +578,22 @@ export default function Home() {
                     <p className="text-sm text-foreground/90">{getEditorialAngle(project)}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Link href={`/project/${project.id}`} className="flex-1">
-                      <Button size="sm" className="w-full bg-primary hover:bg-primary/90">View Details</Button>
-                    </Link>
+                    {hasProjectDetailPage(project) ? (
+                      <Link href={getProjectHref(project)} className="flex-1">
+                        <Button size="sm" className="w-full bg-primary hover:bg-primary/90">View Details</Button>
+                      </Link>
+                    ) : (
+                      <a href={getProjectHref(project)} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full bg-primary hover:bg-primary/90">Open Project</Button>
+                      </a>
+                    )}
                     <Button
                       size="sm"
-                      variant={boostedIds.includes(project.id) ? "default" : "outline"}
-                      className={boostedIds.includes(project.id) ? "bg-green-600 hover:bg-green-700" : "border-border"}
+                      variant={project.coingecko_id && boostedIds.includes(project.coingecko_id) ? "default" : "outline"}
+                      className={project.coingecko_id && boostedIds.includes(project.coingecko_id) ? "bg-green-600 hover:bg-green-700" : "border-border"}
                       onClick={() => toggleBoost(project.id)}
                     >
-                      🚀 Boost
+                      {project.coingecko_id ? '🚀 Boost' : '↗ Visit'}
                     </Button>
                   </div>
                 </CardContent>
@@ -615,16 +643,22 @@ export default function Home() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/project/${project.id}`}>
-                          <Button size="sm" className="bg-primary hover:bg-primary/90">View</Button>
-                        </Link>
+                        {hasProjectDetailPage(project) ? (
+                          <Link href={getProjectHref(project)}>
+                            <Button size="sm" className="bg-primary hover:bg-primary/90">View</Button>
+                          </Link>
+                        ) : (
+                          <a href={getProjectHref(project)} target="_blank" rel="noopener noreferrer">
+                            <Button size="sm" className="bg-primary hover:bg-primary/90">Open</Button>
+                          </a>
+                        )}
                         <Button
                           size="sm"
-                          variant={boostedIds.includes(project.id) ? "default" : "outline"}
-                          className={boostedIds.includes(project.id) ? "bg-green-600 hover:bg-green-700" : "border-border"}
+                          variant={project.coingecko_id && boostedIds.includes(project.coingecko_id) ? "default" : "outline"}
+                          className={project.coingecko_id && boostedIds.includes(project.coingecko_id) ? "bg-green-600 hover:bg-green-700" : "border-border"}
                           onClick={() => toggleBoost(project.id)}
                         >
-                          🚀
+                          {project.coingecko_id ? '🚀' : '↗'}
                         </Button>
                       </div>
                     </td>

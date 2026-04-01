@@ -3,6 +3,7 @@ export type CryptoRow = {
   name: string;
   symbol?: string | null;
   slug?: string | null;
+  id?: string | null;
   status?: string | null;
   source?: string | null;
   category?: string | null;
@@ -130,4 +131,47 @@ export function matchesSearch(record: CryptoRow, query: string) {
 
 export function isMarketEligible(record: CryptoRow) {
   return (record.status || "").toLowerCase() === "listed" && typeof record.price_change_24h === "number";
+}
+
+export function isStrongFallbackDiscovery(record: CryptoRow) {
+  const status = (record.status || "").toLowerCase();
+  const rank = record.market_cap_rank ?? Number.POSITIVE_INFINITY;
+  const category = (record.category || record.ecosystem || "").trim();
+
+  if (status !== "listed") return false;
+  if (rank <= 20 || rank > 300) return false;
+  if (!category || category.toLowerCase() === "uncategorized") return false;
+  if (getRecordHealth(record) < 3) return false;
+  return true;
+}
+
+export function getSourceLabel(record: CryptoRow) {
+  const source = (record.source || "").toLowerCase();
+  if (source === "manual") return "Manual";
+  if (source === "scout") return "Scout";
+  if (source === "cryptorank") return "CryptoRank";
+  if (source === "coinlaunch") return "CoinLaunch";
+  if (source === "coingecko") return "CoinGecko";
+  return "LamboMoon";
+}
+
+export function getStatusLabel(record: CryptoRow) {
+  const status = (record.status || "").toLowerCase();
+  if (status === "upcoming") return "Upcoming";
+  if (status === "prelaunch") return "Prelaunch";
+  if (status === "watching") return "Watching";
+  if (status === "airdrop") return "Airdrop";
+  if (status === "testnet") return "Testnet";
+  if (status === "listed") return "Listed";
+  return "Radar";
+}
+
+export function hasProjectDetailPage(record: CryptoRow) {
+  return Boolean(record.coingecko_id);
+}
+
+export function getProjectHref(record: CryptoRow) {
+  if (record.coingecko_id) return `/project/${record.coingecko_id}`;
+  const fallbackUrl = record.website_url || record.docs_url || record.x_url || record.telegram_url || record.source_url;
+  return fallbackUrl || '#';
 }
