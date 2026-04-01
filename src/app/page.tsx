@@ -658,6 +658,7 @@ export default function Home() {
                   ) : null}
                   <div className="flex flex-wrap gap-2 mb-3 text-xs">
                     <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{getStatusLabel(project)}</span>
+                    {project.ecosystem ? <span className="px-2 py-1 rounded-full bg-secondary/70 text-muted-foreground">{project.ecosystem}</span> : null}
                     <span className="px-2 py-1 rounded-full bg-secondary/60 text-muted-foreground">{getSourceLabel(project)}</span>
                   </div>
                   <div className="rounded-lg bg-secondary/30 border border-border/50 p-3 mb-4">
@@ -713,7 +714,10 @@ export default function Home() {
                     </td>
                     <td className="py-3 px-4 font-mono text-primary">{project.symbol}</td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-1 text-xs rounded-full bg-secondary">{project.category || 'Uncategorized'}</span>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-2 py-1 text-xs rounded-full bg-secondary">{project.category || 'Uncategorized'}</span>
+                        {project.ecosystem ? <span className="px-2 py-1 text-xs rounded-full bg-secondary/70 text-muted-foreground">{project.ecosystem}</span> : null}
+                      </div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex flex-wrap gap-2 text-xs">

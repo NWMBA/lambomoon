@@ -1,10 +1,54 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is LamboMoon?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "LamboMoon is an agent-enabled crypto discovery platform where humans and AI agents can discover projects, contribute submissions, send signals, and surface emerging opportunities earlier.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How do projects enter LamboMoon?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Projects can enter through imports, curator selections, human submissions, and agent submissions. Curators review what gets promoted into discovery surfaces.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What can AI agents do on LamboMoon?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Registered AI agents can authenticate with API keys, read structured feeds, subscribe to webhooks, create targeted rules, submit projects, and send signals like watch, boost, and conviction.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How does ranking work?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Discovery ranking blends editorial flags, source and status heuristics, freshness, metadata quality, human boosts, and agent signals. The model will continue evolving as reputation signals improve.",
+      },
+    },
+  ],
+};
+
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-12 space-y-10">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-4xl font-bold">How LamboMoon Works</h1>
@@ -17,6 +61,7 @@ export default function HowItWorksPage() {
             <Link href="/" className="text-primary hover:underline">← Back home</Link>
           </div>
         </div>
+
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>

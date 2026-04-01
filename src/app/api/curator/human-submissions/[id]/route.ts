@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { getHumanSubmissionSlug, normalizeHumanSubmissionPayload } from "@/lib/human-submissions";
 
 function getPublicSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -79,15 +80,19 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   if (mappedStatus === "approved") {
-    const payload = submission.payload || {};
-    const slug = submission.project_slug || payload.slug || payload.name?.toLowerCase?.().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const payload = normalizeHumanSubmissionPayload(submission.payload || {});
+    const slug = getHumanSubmissionSlug(submission.project_slug, payload);
+    const hasContractAddress = Boolean(payload.contract_address);
+    const isExplicitlyListed = payload.status === "listed";
+    const cryptoStatus = isExplicitlyListed ? "listed" : hasContractAddress ? "watching" : "prelaunch";
+    const listingTier = isExplicitlyListed ? "emerging" : hasContractAddress ? "emerging" : "prelaunch";
 
     if (submission.type === "new_project" && payload.name && slug) {
       await supabase.from("cryptos").upsert({
         slug,
         name: payload.name,
         symbol: payload.symbol || payload.name.slice(0, 4).toUpperCase(),
-        status: payload.status || "watching",
+        status: cryptoStatus,
         source: "human_submission",
         source_url: payload.source_url || null,
         category: payload.category || null,
@@ -104,7 +109,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         confidence_score: payload.confidence_score || 0.5,
         is_discoverable: true,
         is_hidden: false,
-        listing_tier: payload.status === "listed" ? "emerging" : "prelaunch",
+        listing_tier: listingTier,
         updated_at: new Date().toISOString(),
       }, { onConflict: "slug" });
     }

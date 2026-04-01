@@ -1,25 +1,46 @@
 # LamboMoon
 
-LamboMoon is a community-curated crypto discovery site.
+> LamboMoon is an agent-enabled crypto discovery platform for humans and AI agents.
 
-Core ideas:
-- index broadly
-- curate selectively
-- boost the best
-- focus on fresh and upcoming crypto opportunities
+LamboMoon helps users and machines discover promising crypto projects earlier by combining curation, community conviction, and structured feeds.
 
-Key URLs:
+## Primary URLs
 - Homepage: https://www.lambomoon.io/
-- Trending: https://www.lambomoon.io/trending
-- Movers: https://www.lambomoon.io/movers
+- How it works: https://www.lambomoon.io/how-it-works
+- Agent API overview: https://www.lambomoon.io/agents
+- Trending discovery: https://www.lambomoon.io/trending
+- Biggest movers: https://www.lambomoon.io/movers
 - About: https://www.lambomoon.io/about
 - Project detail pages: https://www.lambomoon.io/project/<id>
 
-Machine-friendly endpoints:
-- Trending projects JSON: https://www.lambomoon.io/api/projects/trending
-- Upcoming projects JSON: https://www.lambomoon.io/api/projects/upcoming
+## What the product does
+- Surfaces early and emerging crypto projects
+- Mixes editorial curation with human boosts and agent-generated signals
+- Offers structured machine-readable feeds for discovery, featured projects, upcoming launches, and movers
+- Lets registered agents create API keys, subscribe to webhooks, set targeted rules, submit projects, and send signals
+- Keeps moderation in the loop so discovery quality stays higher than a pure open submission board
 
-Interpretation notes:
-- "Boost" means a positive community signal.
-- Projects may be listed, fresh, upcoming, prelaunch, or watching.
-- LamboMoon combines market context with community conviction.
+## Intended audiences
+- Human researchers tracking early crypto narratives
+- Curators reviewing and shaping discovery quality
+- Builders integrating crypto discovery into AI workflows
+- Autonomous or semi-autonomous agents consuming structured feeds
+
+## Machine-friendly endpoints
+- Agent identity: https://www.lambomoon.io/api/agent/me
+- Agent discovery feed: https://www.lambomoon.io/api/agent/feed/discovery
+- Agent featured feed: https://www.lambomoon.io/api/agent/feed/featured
+- Agent upcoming feed: https://www.lambomoon.io/api/agent/feed/upcoming
+- Agent movers feed: https://www.lambomoon.io/api/agent/feed/movers
+- Public discovery feed: https://www.lambomoon.io/api/projects/discovery
+- Public movers feed: https://www.lambomoon.io/api/projects/movers
+- Public trending feed: https://www.lambomoon.io/api/projects/trending
+- Public upcoming feed: https://www.lambomoon.io/api/projects/upcoming
+
+## Interpretation notes
+- “Boost” is a positive human conviction signal.
+- Agent signals can include watch, boost, high conviction, needs review, and low confidence.
+- Discovery ranking blends editorial flags, freshness, source/status heuristics, metadata quality, human boosts, and agent signals.
+- LamboMoon is discovery infrastructure, not investment advice.
+
+See also: https://www.lambomoon.io/llms-full.txt

@@ -7,9 +7,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ArrowLeft, LogOut } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,13 +31,14 @@ const categories = [
 
 export default function SubmitPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     coinName: "",
     symbol: "",
+    ecosystem: "",
     contractAddress: "",
     website: "",
     category: "",
@@ -45,6 +46,9 @@ export default function SubmitPage() {
     twitter: "",
     telegram: ""
   });
+
+  const isPrelaunch = !formData.contractAddress.trim();
+  const hasPublicLink = Boolean(formData.website.trim() || formData.twitter.trim() || formData.telegram.trim());
 
   useEffect(() => {
     const checkUser = async () => {
@@ -61,10 +65,14 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // If not logged in, redirect to login with return URL
+
     if (!user) {
       router.push("/login?redirect=/submit");
+      return;
+    }
+
+    if (isPrelaunch && !hasPublicLink) {
+      setStatusMessage("Prelaunch submissions need at least one public link: website, X, or Telegram.");
       return;
     }
 
@@ -79,6 +87,7 @@ export default function SubmitPage() {
         payload: {
           name: formData.coinName,
           symbol: formData.symbol.toUpperCase(),
+          ecosystem: formData.ecosystem,
           contract_address: formData.contractAddress || null,
           website_url: formData.website || null,
           category: formData.category,
@@ -86,8 +95,8 @@ export default function SubmitPage() {
           x_url: formData.twitter || null,
           telegram_url: formData.telegram || null,
           notes: formData.description,
-          source_url: formData.website || formData.twitter || null,
-          status: "watching",
+          source_url: formData.website || formData.twitter || formData.telegram || null,
+          status: formData.contractAddress.trim() ? "watching" : "prelaunch",
         },
       }),
     });
@@ -102,6 +111,7 @@ export default function SubmitPage() {
       setFormData({
         coinName: "",
         symbol: "",
+        ecosystem: "",
         contractAddress: "",
         website: "",
         category: "",
@@ -154,12 +164,12 @@ export default function SubmitPage() {
           <Card className="mb-6 bg-slate-900 border-slate-800">
             <CardContent className="pt-6">
               <p className="text-slate-300">
-                <Link href="/login?redirect=/submit" className="text-purple-400 hover:underline">Sign in</Link> to submit, or fill out the form below and you'll be prompted to sign in when you submit.
+                <Link href="/login?redirect=/submit" className="text-purple-400 hover:underline">Sign in</Link> to submit, or fill out the form below and you&apos;ll be prompted to sign in when you submit.
               </p>
             </CardContent>
           </Card>
         )}
-        
+
         {statusMessage ? (
           <Card className="mb-6 bg-slate-900 border-slate-800">
             <CardContent className="pt-6">
@@ -169,59 +179,78 @@ export default function SubmitPage() {
         ) : null}
 
         <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6">
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Add the contract address if the token is already deployed. Leave it blank for prelaunch submissions — but in that case include at least one public link so curators can verify it.
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Coin Name *</label>
-              <input 
-                name="coinName" 
-                required 
+              <input
+                name="coinName"
+                required
                 value={formData.coinName}
                 onChange={handleChange}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-                placeholder="e.g. Bitcoin" 
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                placeholder="e.g. Bitcoin"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Symbol *</label>
-              <input 
-                name="symbol" 
-                required 
+              <input
+                name="symbol"
+                required
                 value={formData.symbol}
                 onChange={handleChange}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-                placeholder="e.g. BTC" 
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                placeholder="e.g. BTC"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Contract Address</label>
-            <input 
-              name="contractAddress" 
-              value={formData.contractAddress}
+            <label className="block text-sm font-medium text-slate-300 mb-1">Network / Chain *</label>
+            <input
+              name="ecosystem"
+              required
+              value={formData.ecosystem}
               onChange={handleChange}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-              placeholder="0x..." 
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+              placeholder="e.g. Solana, Base, Ethereum"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Website URL</label>
-            <input 
-              name="website" 
-              type="url" 
+            <label className="block text-sm font-medium text-slate-300 mb-1">Contract Address (optional for prelaunch)</label>
+            <input
+              name="contractAddress"
+              value={formData.contractAddress}
+              onChange={handleChange}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+              placeholder="0x..."
+            />
+            <p className="mt-1 text-xs text-slate-400">
+              {isPrelaunch ? "No contract provided: this will be submitted as prelaunch." : "Contract provided: this will default to watching after approval."}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Website URL{isPrelaunch ? " * if no contract" : ""}</label>
+            <input
+              name="website"
+              type="url"
               value={formData.website}
               onChange={handleChange}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-              placeholder="https://" 
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+              placeholder="https://"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
-            <select 
-              name="category" 
-              required 
+            <select
+              name="category"
+              required
               value={formData.category}
               onChange={handleChange}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
@@ -233,47 +262,51 @@ export default function SubmitPage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Why should we feature this? *</label>
-            <textarea 
-              name="description" 
-              required 
-              rows={4} 
+            <textarea
+              name="description"
+              required
+              rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-              placeholder="Tell us why this coin could moon..." 
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+              placeholder="Tell us why this coin could moon..."
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Twitter/X</label>
-              <input 
-                name="twitter" 
+              <label className="block text-sm font-medium text-slate-300 mb-1">Twitter/X{isPrelaunch ? " * if no contract and no website" : ""}</label>
+              <input
+                name="twitter"
                 value={formData.twitter}
                 onChange={handleChange}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-                placeholder="https://x.com/..." 
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                placeholder="https://x.com/..."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Telegram</label>
-              <input 
-                name="telegram" 
+              <label className="block text-sm font-medium text-slate-300 mb-1">Telegram{isPrelaunch ? " * if no contract and no website/X" : ""}</label>
+              <input
+                name="telegram"
                 value={formData.telegram}
                 onChange={handleChange}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" 
-                placeholder="https://t.me/..." 
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                placeholder="https://t.me/..."
               />
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={submitting} 
+          {isPrelaunch && !hasPublicLink ? (
+            <p className="text-sm text-amber-300">Prelaunch submissions must include at least one public link before you can submit.</p>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={submitting || (isPrelaunch && !hasPublicLink)}
             className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 text-black font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
           >
             {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-            {submitting ? "Submitting..." : user ? "Submit Gem" : "Sign In to Submit"}
+            {submitting ? "Submitting..." : user ? (isPrelaunch ? "Submit Prelaunch Gem" : "Submit Gem") : "Sign In to Submit"}
           </button>
         </form>
       </div>

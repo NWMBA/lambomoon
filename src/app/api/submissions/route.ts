@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { getHumanSubmissionSlug, normalizeHumanSubmissionPayload, validateHumanSubmissionPayload } from "@/lib/human-submissions";
 
 function getPublicSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -51,15 +52,22 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const payload = typeof body?.payload === "object" && body?.payload ? body.payload : null;
-  const projectSlug = body?.project_slug ? String(body.project_slug).trim() : null;
-
-  if (!payload?.name) {
-    return NextResponse.json({ error: "Submission name is required" }, { status: 400 });
+  const rawPayload = typeof body?.payload === "object" && body?.payload ? body.payload : null;
+  if (!rawPayload) {
+    return NextResponse.json({ error: "Submission payload is required" }, { status: 400 });
   }
 
-  const status = payload.website_url || payload.source_url || payload.x_url ? "needs_review" : "pending";
-  const reason = status === "needs_review" ? "Ready for curator review" : "Needs more metadata";
+  const payload = normalizeHumanSubmissionPayload(rawPayload);
+  const validationError = validateHumanSubmissionPayload(payload);
+  if (validationError) {
+    return NextResponse.json({ error: validationError }, { status: 400 });
+  }
+
+  const projectSlug = getHumanSubmissionSlug(body?.project_slug, payload);
+  const status = "needs_review";
+  const reason = payload.contract_address
+    ? "Ready for curator review as a watching candidate"
+    : "Ready for curator review as a prelaunch candidate";
 
   const supabase = getAdminSupabase();
   if (!supabase) return NextResponse.json({ error: "Missing service role env vars" }, { status: 500 });

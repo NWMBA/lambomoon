@@ -5,11 +5,20 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+type SubmissionPayload = {
+  name?: string | null;
+  symbol?: string | null;
+  category?: string | null;
+  ecosystem?: string | null;
+  contract_address?: string | null;
+  [key: string]: unknown;
+};
+
 type Submission = {
   id: string;
   type: string;
   project_slug?: string | null;
-  payload: Record<string, any>;
+  payload: SubmissionPayload;
   status: string;
   reason?: string | null;
   created_at: string;
@@ -67,27 +76,41 @@ export default function CuratorHumanSubmissionsPage() {
           <p className="text-muted-foreground">Loading submissions…</p>
         ) : (
           <div className="space-y-4">
-            {submissions.map((submission) => (
-              <Card key={submission.id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between text-lg">
-                    <span>{submission.payload?.name || submission.project_slug || "Untitled submission"}</span>
-                    <span className="text-xs rounded-full bg-secondary px-2 py-1 text-muted-foreground">{submission.status}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <p><strong>Type:</strong> {submission.type}</p>
-                  {submission.reason ? <p><strong>Review note:</strong> {submission.reason}</p> : null}
-                  <p><strong>Created:</strong> {new Date(submission.created_at).toLocaleString()}</p>
-                  <div className="flex gap-2">
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => moderateSubmission(submission.id, "approve")}>Approve</Button>
-                    <Button size="sm" variant="outline" onClick={() => moderateSubmission(submission.id, "needs_review")}>Needs review</Button>
-                    <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={() => moderateSubmission(submission.id, "reject")}>Reject</Button>
-                  </div>
-                  <pre className="overflow-x-auto rounded-md bg-secondary/30 p-3 text-xs whitespace-pre-wrap">{JSON.stringify(submission.payload, null, 2)}</pre>
-                </CardContent>
-              </Card>
-            ))}
+            {submissions.map((submission) => {
+              const payload = submission.payload || {};
+              const hasContract = Boolean(payload.contract_address);
+              const approvalOutcome = hasContract ? "approve → watching / emerging" : "approve → prelaunch / prelaunch";
+
+              return (
+                <Card key={submission.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between gap-3 text-lg">
+                      <span>{payload?.name || submission.project_slug || "Untitled submission"}</span>
+                      <div className="flex flex-wrap justify-end gap-2 text-xs">
+                        <span className="rounded-full bg-secondary px-2 py-1 text-muted-foreground">{submission.status}</span>
+                        {payload?.ecosystem ? <span className="rounded-full bg-secondary/70 px-2 py-1 text-muted-foreground">{payload.ecosystem}</span> : null}
+                        <span className="rounded-full bg-secondary/70 px-2 py-1 text-muted-foreground">{hasContract ? "watching candidate" : "prelaunch candidate"}</span>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <p><strong>Type:</strong> {submission.type}</p>
+                    {payload?.symbol ? <p><strong>Symbol:</strong> {payload.symbol}</p> : null}
+                    {payload?.category ? <p><strong>Category:</strong> {payload.category}</p> : null}
+                    {payload?.contract_address ? <p><strong>Contract:</strong> <span className="font-mono text-xs">{payload.contract_address}</span></p> : <p><strong>Contract:</strong> None supplied</p>}
+                    {submission.reason ? <p><strong>Review note:</strong> {submission.reason}</p> : null}
+                    <p><strong>Created:</strong> {new Date(submission.created_at).toLocaleString()}</p>
+                    <p><strong>Approval outcome:</strong> {approvalOutcome}</p>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => moderateSubmission(submission.id, "approve")}>Approve</Button>
+                      <Button size="sm" variant="outline" onClick={() => moderateSubmission(submission.id, "needs_review")}>Needs review</Button>
+                      <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={() => moderateSubmission(submission.id, "reject")}>Reject</Button>
+                    </div>
+                    <pre className="overflow-x-auto rounded-md bg-secondary/30 p-3 text-xs whitespace-pre-wrap">{JSON.stringify(payload, null, 2)}</pre>
+                  </CardContent>
+                </Card>
+              );
+            })}
             {submissions.length === 0 ? <p className="text-muted-foreground">No human submissions yet.</p> : null}
           </div>
         )}
