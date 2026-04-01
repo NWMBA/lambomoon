@@ -34,6 +34,8 @@ export default function CuratorPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [savingSlug, setSavingSlug] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusType, setStatusType] = useState<"error" | "success" | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -50,6 +52,8 @@ export default function CuratorPage() {
 
   async function patchProject(slug: string, patch: Partial<CurationProject>) {
     setSavingSlug(slug);
+    setStatusMessage(null);
+    setStatusType(null);
     try {
       const response = await fetch("/api/projects/curation", {
         method: "PATCH",
@@ -59,8 +63,12 @@ export default function CuratorPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to save curation settings");
       setProjects((prev) => prev.map((project) => (project.slug === slug ? data.project : project)));
-    } catch (error) {
+      setStatusType("success");
+      setStatusMessage(`Saved curator settings for ${data.project.name}.`);
+    } catch (error: any) {
       console.error(error);
+      setStatusType("error");
+      setStatusMessage(error?.message || "Failed to save curation settings.");
     } finally {
       setSavingSlug(null);
     }
@@ -116,6 +124,17 @@ export default function CuratorPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, symbol, slug, category..."
           />
+        </div>
+
+        <div className="mb-6 space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Editing requires a signed-in admin account listed in <code className="rounded bg-secondary px-1 py-0.5">CURATOR_ADMIN_EMAILS</code>.
+          </p>
+          {statusMessage ? (
+            <div className={`rounded-md border px-3 py-2 text-sm ${statusType === "error" ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-green-500/40 bg-green-500/10 text-green-300"}`}>
+              {statusMessage}
+            </div>
+          ) : null}
         </div>
 
         {loading ? (
