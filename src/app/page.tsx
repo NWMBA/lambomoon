@@ -344,22 +344,6 @@ export default function Home() {
             Discover the next 100x crypto gems before they take off
           </p>
           
-          {/* Stats */}
-          <div className="flex justify-center gap-8 mb-8 flex-wrap">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">Thousands</div>
-              <div className="text-sm text-muted-foreground">Cryptos Indexed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">Boost</div>
-              <div className="text-sm text-muted-foreground">Driven Discovery</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400">Fresh</div>
-              <div className="text-sm text-muted-foreground">New + Upcoming Tokens</div>
-            </div>
-          </div>
-          
           {/* Search */}
           <div className="max-w-xl mx-auto mb-8">
             <div className="relative">
@@ -376,11 +360,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="flex justify-center gap-4">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">Explore Now</Button>
-            <Button size="lg" variant="outline" className="border-border">Learn More</Button>
-          </div>
         </div>
       </section>
 

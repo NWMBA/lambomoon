@@ -34,7 +34,7 @@ export default function NewsTicker() {
       <div className="container mx-auto px-4 flex items-center gap-4">
         <div className="shrink-0 text-xs font-semibold uppercase tracking-wide text-primary">News</div>
         <div className="relative overflow-hidden w-full">
-          <div className="flex gap-8 whitespace-nowrap animate-[ticker_40s_linear_infinite] min-w-max">
+          <div className="flex gap-8 whitespace-nowrap animate-[ticker_80s_linear_infinite] min-w-max">
             {[...content, ...content].map((item, index) => (
               <a
                 key={`${item.title}-${index}`}
