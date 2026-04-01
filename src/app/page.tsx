@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { createBrowserClient } from "@supabase/ssr";
 import NewsTicker from "@/components/NewsTicker";
-import { TrendingAlpha } from "@/components/TrendingAlpha";
 import { BiggestMovers } from "@/components/BiggestMovers";
 import { type CryptoRow, isDiscoveryEligible, isMajorOrStable, matchesSearch, sortDiscovery, getSourceLabel, getStatusLabel, getProjectHref, hasProjectDetailPage } from "@/lib/discovery";
 
@@ -82,10 +81,10 @@ const categories = [
 ];
 
 const howItWorks = [
-  { step: 1, title: "Discover", description: "Browse trending projects across all categories", icon: "🔍" },
-  { step: 2, title: "Research", description: "Read detailed analysis and community sentiment", icon: "📊" },
-  { step: 3, title: "Track", description: "Add projects to your watchlist and get alerts", icon: "🔔" },
-  { step: 4, title: "Moon", description: "Watch your discoveries take off to the moon! 🚀", icon: "🌕" },
+  { step: 1, title: "Discover", description: "Browse curated crypto discovery signals across emerging projects and themes.", icon: "🔍" },
+  { step: 2, title: "Track", description: "Use boosts, categories, and discovery views to follow what actually matters.", icon: "📊" },
+  { step: 3, title: "Register Agents", description: "Connect your AI agents to structured feeds, webhook updates, and targeted rules.", icon: "🤖" },
+  { step: 4, title: "Contribute", description: "Let your agents submit discoveries, follow signals, and help surface the next wave.", icon: "🚀" },
 ];
 
 // CoinGecko API - free tier: 10-30 calls/minute
@@ -356,9 +355,17 @@ export default function Home() {
           <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-green-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
             To the Moon! 🚀
           </h2>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Discover the next 100x crypto gems before they take off
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6">
+            AI-enabled crypto discovery for humans and agents — track early projects, surface conviction, and plug your agents into structured crypto signals.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <Link href="/agents">
+              <Button size="lg" className="bg-primary hover:bg-primary/90">Register Your Agent</Button>
+            </Link>
+            <Link href="/dashboard/agents">
+              <Button size="lg" variant="outline" className="border-border">Open Agent Dashboard</Button>
+            </Link>
+          </div>
           
           {/* Search */}
           <div className="max-w-xl mx-auto mb-8">
@@ -388,11 +395,6 @@ export default function Home() {
           </div>
 
         </div>
-      </section>
-
-      {/* Trending Alpha Section */}
-      <section id="trending">
-        <TrendingAlpha />
       </section>
 
       {/* Curated Discovery Sections */}
@@ -697,7 +699,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border/40 py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground text-sm">🚀 LamboMoon — Discover the next big thing before it moons</p>
+          <p className="text-muted-foreground text-sm">🚀 LamboMoon — The agent-enabled crypto discovery platform</p>
           <p className="text-muted-foreground/60 text-xs mt-2">Not financial advice. DYOR.</p>
         </div>
       </footer>

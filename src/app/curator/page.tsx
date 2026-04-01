@@ -96,7 +96,10 @@ export default function CuratorPage() {
             <h1 className="text-3xl font-bold">Curator Controls</h1>
             <p className="text-muted-foreground mt-2">Review and edit featured, discoverable, hidden, and listing-tier settings directly from the indexed crypto universe.</p>
           </div>
-          <Link href="/" className="text-primary hover:underline">← Back home</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/curator/submissions" className="text-primary hover:underline">Agent submissions</Link>
+            <Link href="/" className="text-primary hover:underline">← Back home</Link>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-4 gap-4 mb-8">
