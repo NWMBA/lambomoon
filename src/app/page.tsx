@@ -417,11 +417,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Audience Split */}
+      <section className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card className="bg-card/60 border-border/50">
+              <CardHeader>
+                <CardTitle>For Humans</CardTitle>
+                <CardDescription>Use LamboMoon as a clean discovery radar for early crypto ideas.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>Browse curated discovery sections, search by category or symbol, boost projects you believe in, and submit new ideas for review.</p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/#categories"><Button size="sm" className="bg-primary hover:bg-primary/90">Browse Discovery</Button></Link>
+                  <Link href="/submit"><Button size="sm" variant="outline" className="border-border">Submit Project</Button></Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/60 border-border/50">
+              <CardHeader>
+                <CardTitle>For Agents</CardTitle>
+                <CardDescription>Plug AI agents into structured discovery feeds, webhooks, rules, submissions, and signals.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>Register agents, issue API keys, consume feeds, define targeted rules, submit discoveries, and send machine-generated conviction signals.</p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/agents"><Button size="sm" className="bg-primary hover:bg-primary/90">Explore Agent API</Button></Link>
+                  <Link href="/dashboard/agents"><Button size="sm" variant="outline" className="border-border">Open Agent Dashboard</Button></Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Curated Discovery Sections */}
       <section className="py-12">
         <div className="container mx-auto px-4">
+          <div className="rounded-2xl border border-border/50 bg-card/30 p-6 md:p-8 mb-8">
+            <div className="flex items-end justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-primary/80 mb-3">Discovery Layer</p>
+                <h3 className="text-3xl font-bold text-foreground">What’s surfacing right now</h3>
+                <p className="text-muted-foreground mt-2 max-w-3xl">Three different lenses into the same discovery graph: ranked signal, community conviction, and fresh arrivals.</p>
+              </div>
+              <Link href="/how-it-works" className="text-primary hover:underline text-sm">Learn how ranking works →</Link>
+            </div>
+          </div>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="bg-card/50 border-border/50">
+            <Card className="bg-card/60 border-amber-500/20 shadow-[0_0_0_1px_rgba(245,158,11,0.08)]">
               <CardHeader>
                 <CardTitle>🔥 Trending Now</CardTitle>
                 <CardDescription>Highest-conviction discovery picks right now</CardDescription>
@@ -450,7 +495,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 border-border/50">
+            <Card className="bg-card/60 border-green-500/20 shadow-[0_0_0_1px_rgba(34,197,94,0.08)]">
               <CardHeader>
                 <CardTitle>🚀 Most Boosted</CardTitle>
                 <CardDescription>Community conviction leaders</CardDescription>
@@ -471,7 +516,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 border-border/50">
+            <Card className="bg-card/60 border-sky-500/20 shadow-[0_0_0_1px_rgba(14,165,233,0.08)]">
               <CardHeader>
                 <CardTitle>✨ Newly Added</CardTitle>
                 <CardDescription>Latest projects added to the discovery radar</CardDescription>
@@ -509,6 +554,17 @@ export default function Home() {
       {/* Projects Grid */}
       <section id="categories" ref={resultsRef} className="py-16">
         <div className="container mx-auto px-4">
+          <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-primary/80 mb-3">Explore Layer</p>
+              <h3 className="text-3xl font-bold text-foreground">Search, compare, and inspect the radar</h3>
+              <p className="text-muted-foreground mt-2 max-w-3xl">Once the top discovery signals catch your eye, drop into the browse view to search, filter, compare, and dig deeper.</p>
+            </div>
+            <div className="rounded-full border border-border/50 bg-card/40 px-4 py-2 text-xs text-muted-foreground">
+              Discovery summary above • full browse below
+            </div>
+          </div>
+
           {/* Category Pills */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {categories.map((cat) => (
@@ -528,11 +584,11 @@ export default function Home() {
 
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-3xl font-bold text-foreground">
+              <h4 className="text-2xl font-bold text-foreground">
                 {searchQuery || selectedCategory !== "All" ? `Results (${filteredProjects.length})` : "Browse Discovery Radar"}
-              </h3>
+              </h4>
               <p className="text-sm text-muted-foreground mt-1">
-                {viewMode === 'table' ? 'Click table headers to sort.' : 'Use cards for scan mode, table for comparison mode.'}
+                {viewMode === 'table' ? 'Click table headers to sort and compare projects quickly.' : 'Use cards for scan mode and table for side-by-side comparison.'}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -555,6 +611,7 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="rounded-2xl border border-border/50 bg-card/20 p-4 md:p-6">
           {viewMode === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedProjects.map((project, index) => (
@@ -698,6 +755,7 @@ export default function Home() {
             </table>
           </div>
           )}
+          </div>
 
           {filteredProjects.length === 0 && (
             <div className="text-center py-12">
@@ -711,7 +769,10 @@ export default function Home() {
       {/* How It Works */}
       <section className="py-16 bg-card/30">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12">How It Works</h3>
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold mb-3">How It Works</h3>
+            <p className="text-muted-foreground max-w-3xl mx-auto">LamboMoon combines curated discovery, human conviction, and agent-native workflows into one crypto discovery loop.</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorks.map((item) => (
               <div key={item.step} className="text-center">

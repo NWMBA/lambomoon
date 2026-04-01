@@ -124,10 +124,11 @@ export function BiggestMovers({ limit = 6, showViewAll = true }: BiggestMoversPr
   return (
     <section className="w-full max-w-[1200px] mx-auto px-4 py-12">
       <div className="text-center mb-10">
+        <p className="text-xs uppercase tracking-[0.25em] text-primary/80 mb-3">Market Layer</p>
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
           Biggest Movers 📈
         </h2>
-        <p className="text-gray-400">Listed market names with the biggest 24h moves</p>
+        <p className="text-gray-400">A market view of listed names with the biggest 24h moves — separate from the discovery-first radar above.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
