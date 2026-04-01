@@ -34,6 +34,7 @@ export default function SubmitPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     coinName: "",
     symbol: "",
@@ -68,27 +69,46 @@ export default function SubmitPage() {
     }
 
     setSubmitting(true);
+    setStatusMessage(null);
 
-    const { error } = await supabase.from("projects").insert({
-      name: formData.coinName,
-      symbol: formData.symbol.toUpperCase(),
-      contract_address: formData.contractAddress || null,
-      website: formData.website || null,
-      category: formData.category,
-      description: formData.description,
-      twitter: formData.twitter || null,
-      telegram: formData.telegram || null,
-      user_id: user.id
+    const response = await fetch("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        project_slug: formData.coinName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
+        payload: {
+          name: formData.coinName,
+          symbol: formData.symbol.toUpperCase(),
+          contract_address: formData.contractAddress || null,
+          website_url: formData.website || null,
+          category: formData.category,
+          description: formData.description,
+          x_url: formData.twitter || null,
+          telegram_url: formData.telegram || null,
+          notes: formData.description,
+          source_url: formData.website || formData.twitter || null,
+          status: "watching",
+        },
+      }),
     });
 
+    const data = await response.json();
     setSubmitting(false);
 
-    if (error) {
-      alert("Error submitting: " + error.message);
+    if (!response.ok) {
+      setStatusMessage(data.error || "Error submitting project.");
     } else {
-      alert("Submitted successfully! We'll review it soon.");
-      router.push("/");
-      router.refresh();
+      setStatusMessage("Submitted successfully! A curator will review it soon.");
+      setFormData({
+        coinName: "",
+        symbol: "",
+        contractAddress: "",
+        website: "",
+        category: "",
+        description: "",
+        twitter: "",
+        telegram: ""
+      });
     }
   };
 
@@ -140,6 +160,14 @@ export default function SubmitPage() {
           </Card>
         )}
         
+        {statusMessage ? (
+          <Card className="mb-6 bg-slate-900 border-slate-800">
+            <CardContent className="pt-6">
+              <p className="text-slate-300">{statusMessage}</p>
+            </CardContent>
+          </Card>
+        ) : null}
+
         <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

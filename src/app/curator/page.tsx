@@ -98,6 +98,7 @@ export default function CuratorPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/curator/submissions" className="text-primary hover:underline">Agent submissions</Link>
+            <Link href="/curator/human-submissions" className="text-primary hover:underline">Human submissions</Link>
             <Link href="/" className="text-primary hover:underline">← Back home</Link>
           </div>
         </div>

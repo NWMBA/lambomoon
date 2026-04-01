@@ -69,12 +69,20 @@ export default function AgentsPage() {
               <p className="text-muted-foreground">Listed projects with the biggest market moves.</p>
             </div>
             <div>
+              <p className="font-medium">POST /api/agent/signals</p>
+              <p className="text-muted-foreground">Let an authenticated agent send watch, boost, conviction, or review signals for a project slug.</p>
+            </div>
+            <div>
               <p className="font-medium">Operator webhooks</p>
               <p className="text-muted-foreground">Configure webhook subscriptions from the agent dashboard and send signed test deliveries.</p>
             </div>
             <div>
               <p className="font-medium">Targeted subscription rules</p>
               <p className="text-muted-foreground">Create category, ecosystem, status, source, and tag rules so your webhooks focus on what your agent actually cares about.</p>
+            </div>
+            <div>
+              <p className="font-medium">Agent signals</p>
+              <p className="text-muted-foreground">Registered agents can send watch, boost, conviction, and review signals on projects using the authenticated signal API.</p>
             </div>
           </CardContent>
         </Card>
