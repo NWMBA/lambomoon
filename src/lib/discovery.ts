@@ -4,6 +4,9 @@ export type CryptoRow = {
   symbol?: string | null;
   slug?: string | null;
   id?: string | null;
+  agent_watch_count?: number | null;
+  agent_boost_count?: number | null;
+  agent_conviction_count?: number | null;
   status?: string | null;
   source?: string | null;
   category?: string | null;
@@ -113,6 +116,13 @@ export function isDiscoveryEligible(record: CryptoRow) {
   return false;
 }
 
+export function getAgentSignalScore(record: CryptoRow) {
+  const watch = record.agent_watch_count ?? 0;
+  const boost = record.agent_boost_count ?? 0;
+  const conviction = record.agent_conviction_count ?? 0;
+  return watch * 2 + boost * 4 + conviction * 8;
+}
+
 export function discoveryScore(record: CryptoRow) {
   const status = (record.status || "").toLowerCase();
   const source = (record.source || "").toLowerCase();
@@ -135,6 +145,7 @@ export function discoveryScore(record: CryptoRow) {
   else if (daysSinceSeen <= 30) score += 10;
   if (daysUntilLaunch !== null && daysUntilLaunch >= 0 && daysUntilLaunch <= 30) score += 15;
   if (daysUntilLaunch !== null && daysUntilLaunch > 30 && daysUntilLaunch <= 90) score += 8;
+  score += getAgentSignalScore(record);
   return score;
 }
 

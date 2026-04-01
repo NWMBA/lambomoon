@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { createBrowserClient } from "@supabase/ssr";
 import NewsTicker from "@/components/NewsTicker";
 import { BiggestMovers } from "@/components/BiggestMovers";
-import { type CryptoRow, isDiscoveryEligible, isMajorOrStable, matchesSearch, sortDiscovery, getSourceLabel, getStatusLabel, getProjectHref, hasProjectDetailPage } from "@/lib/discovery";
+import { type CryptoRow, isDiscoveryEligible, isMajorOrStable, matchesSearch, sortDiscovery, getSourceLabel, getStatusLabel, getProjectHref, hasProjectDetailPage, getAgentSignalScore } from "@/lib/discovery";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -233,6 +233,20 @@ export default function Home() {
           }, {});
         } catch {}
 
+        let signalCounts: Record<string, { watch: number; boost: number; conviction: number }> = {};
+        try {
+          const { data: signalRows } = await supabase.from("agent_project_signals").select("project_id,signal_type");
+          signalCounts = (signalRows || []).reduce((acc: Record<string, { watch: number; boost: number; conviction: number }>, row: any) => {
+            const key = row.project_id;
+            if (!key) return acc;
+            if (!acc[key]) acc[key] = { watch: 0, boost: 0, conviction: 0 };
+            if (row.signal_type === "watch") acc[key].watch += 1;
+            if (row.signal_type === "boost") acc[key].boost += 1;
+            if (row.signal_type === "high_conviction") acc[key].conviction += 1;
+            return acc;
+          }, {});
+        } catch {}
+
         let baseProjects: Project[] = seedProjects;
         try {
           const { data: importedRows } = await supabase
@@ -243,7 +257,7 @@ export default function Home() {
           if (importedRows && importedRows.length > 0) {
             const mappedRows: Project[] = importedRows.map((row: any) => ({
               ...row,
-              id: row.coingecko_id || row.slug,
+              id: row.id || row.coingecko_id || row.slug,
               name: row.name,
               symbol: row.symbol || row.name?.slice(0, 4).toUpperCase() || "TKN",
               category: row.category || row.ecosystem || "Uncategorized",
@@ -252,6 +266,9 @@ export default function Home() {
               launch_date: row.launch_date || row.first_seen_at || new Date().toISOString(),
               upvotes: upvoteCounts[row.coingecko_id || row.slug] || 0,
               current_price: row.price_usd || prices[row.coingecko_id]?.usd || 0,
+              agent_watch_count: signalCounts[row.id]?.watch || 0,
+              agent_boost_count: signalCounts[row.id]?.boost || 0,
+              agent_conviction_count: signalCounts[row.id]?.conviction || 0,
             }));
 
             const discoveryProjects = sortDiscovery(
@@ -364,6 +381,9 @@ export default function Home() {
             </Link>
             <Link href="/dashboard/agents">
               <Button size="lg" variant="outline" className="border-border">Open Agent Dashboard</Button>
+            </Link>
+            <Link href="/how-it-works">
+              <Button size="lg" variant="outline" className="border-border">How It Works</Button>
             </Link>
           </div>
           
@@ -571,6 +591,14 @@ export default function Home() {
                     <p className="text-xs text-amber-400">{getBoostMilestone(project.upvotes)}</p>
                     <p className="text-xs text-primary">{getProjectBadge(project, index)}</p>
                   </div>
+                  {getAgentSignalScore(project) > 0 ? (
+                    <div className="mb-3 text-xs text-sky-300">
+                      🤖 Agent signal score {getAgentSignalScore(project)}
+                      {project.agent_watch_count ? ` • ${project.agent_watch_count} watches` : ""}
+                      {project.agent_boost_count ? ` • ${project.agent_boost_count} boosts` : ""}
+                      {project.agent_conviction_count ? ` • ${project.agent_conviction_count} conviction` : ""}
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap gap-2 mb-3 text-xs">
                     <span className="px-2 py-1 rounded-full bg-secondary text-muted-foreground">{getStatusLabel(project)}</span>
                     <span className="px-2 py-1 rounded-full bg-secondary/60 text-muted-foreground">{getSourceLabel(project)}</span>

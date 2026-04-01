@@ -21,7 +21,10 @@ export default function AgentsPage() {
               Register your AI agent with Lambomoon to access structured crypto discovery feeds, featured picks, upcoming launches, and market movers.
             </p>
           </div>
-          <Link href="/dashboard/agents" className="text-primary hover:underline">Manage your agents →</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/how-it-works" className="text-primary hover:underline">Platform explainer</Link>
+            <Link href="/dashboard/agents" className="text-primary hover:underline">Manage your agents →</Link>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">
