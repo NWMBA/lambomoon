@@ -17,6 +17,8 @@ interface Project {
   launch_date: string;
   upvotes: number;
   featured: boolean;
+  source?: string;
+  status?: string;
 }
 
 interface TrendingAlphaProps {
@@ -24,95 +26,15 @@ interface TrendingAlphaProps {
   showViewAll?: boolean;
 }
 
-// Mock data for development - Real projects from Scout's research (CoinGecko IDs)
-const mockProjects: Project[] = [
-  {
-    id: 'virtual-protocol',
-    name: 'Virtual Protocol',
-    symbol: 'VIRTUAL',
-    category: 'AI Agents',
-    description: 'Decentralized AI agent infrastructure',
-    price: 1.25,
-    change_24h: 12.5,
-    market_cap: 1250000000,
-    launch_date: '2024-06-15',
-    upvotes: 8500,
-    featured: true,
-  },
-  {
-    id: 'pippin',
-    name: 'Pippin',
-    symbol: 'PIPPIN',
-    category: 'AI Meme',
-    description: 'AI-powered meme coin',
-    price: 0.08,
-    change_24h: 25.2,
-    market_cap: 80000000,
-    launch_date: '2024-11-20',
-    upvotes: 6200,
-    featured: false,
-  },
-  {
-    id: 'plume',
-    name: 'Plume',
-    symbol: 'PLUME',
-    category: 'RWA L1',
-    description: 'Real world assets Layer 1',
-    price: 0.35,
-    change_24h: 8.7,
-    market_cap: 350000000,
-    launch_date: '2024-09-01',
-    upvotes: 4800,
-    featured: true,
-  },
-  {
-    id: 'pump',
-    name: 'Pump',
-    symbol: 'PUMP',
-    category: 'Platform',
-    description: 'Crypto launch platform',
-    price: 0.15,
-    change_24h: -3.2,
-    market_cap: 150000000,
-    launch_date: '2024-10-10',
-    upvotes: 3200,
-    featured: false,
-  },
-  {
-    id: 'war',
-    name: 'WAR',
-    symbol: 'WAR',
-    category: 'Meme',
-    description: 'War-themed meme coin',
-    price: 0.02,
-    change_24h: 45.8,
-    market_cap: 20000000,
-    launch_date: '2024-12-05',
-    upvotes: 2800,
-    featured: true,
-  },
-  {
-    id: 'ai16z',
-    name: 'ai16z',
-    symbol: 'AI16Z',
-    category: 'AI Agents',
-    description: 'AI-powered DeFi agent protocol',
-    price: 0.12,
-    change_24h: 18.3,
-    market_cap: 120000000,
-    launch_date: '2024-08-22',
-    upvotes: 5100,
-    featured: false,
-  },
-];
-
 function formatPrice(price: number): string {
   if (price >= 1000) return `$${price.toLocaleString()}`;
   if (price >= 1) return `$${price.toFixed(2)}`;
-  return `$${price.toFixed(4)}`;
+  if (price > 0) return `$${price.toFixed(4)}`;
+  return 'Early';
 }
 
 function formatMarketCap(cap: number): string {
+  if (!cap) return 'Pre-market';
   if (cap >= 1e12) return `$${(cap / 1e12).toFixed(1)}T`;
   if (cap >= 1e9) return `$${(cap / 1e9).toFixed(1)}B`;
   if (cap >= 1e6) return `$${(cap / 1e6).toFixed(1)}M`;
@@ -162,7 +84,6 @@ function AlphaCard({ project, rank }: { project: Project; rank: number }) {
       data-testid="alpha-card"
       className="block bg-[#1a1a2e] border border-[#2d2d4a] rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#ff6b35]/50 hover:shadow-lg hover:shadow-[#ff6b35]/10"
     >
-      {/* Rank Badge */}
       <div className="flex items-start justify-between mb-3">
         <div
           className={cn(
@@ -177,27 +98,29 @@ function AlphaCard({ project, rank }: { project: Project; rank: number }) {
         </span>
       </div>
 
-      {/* Project Info */}
       <h3 className="text-lg font-semibold text-white mb-1">{project.name}</h3>
-      <p className="text-sm text-gray-400 mb-3">{project.symbol}</p>
+      <p className="text-sm text-gray-400 mb-2">{project.symbol}</p>
+      <p className="text-xs text-[#ff6b35] mb-3 uppercase tracking-wide">{project.status || project.source || 'discovery'}</p>
 
-      {/* Price */}
       <div className="mb-2">
         <span className="text-xl font-bold text-white">{formatPrice(project.price)}</span>
       </div>
 
-      {/* 24h Change */}
       <div className={cn('text-sm font-medium mb-3', isPositive ? 'text-green-500' : 'text-red-500')}>
-        {isPositive ? <TrendingUp className="inline w-4 h-4 mr-1" /> : null}
-        {formatChange(project.change_24h)} (24h)
+        {project.price > 0 ? (
+          <>
+            {isPositive ? <TrendingUp className="inline w-4 h-4 mr-1" /> : null}
+            {formatChange(project.change_24h)} (24h)
+          </>
+        ) : (
+          'Awaiting live market data'
+        )}
       </div>
 
-      {/* Stats */}
       <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
         <span>MCap: {formatMarketCap(project.market_cap)}</span>
       </div>
 
-      {/* Upvote Button */}
       <button
         onClick={handleUpvote}
         className={cn(
@@ -222,10 +145,10 @@ export function TrendingAlpha({ limit = 6, showViewAll = true }: TrendingAlphaPr
   useEffect(() => {
     async function fetchProjects() {
       try {
-        // In production, this would fetch from Supabase
-        // For now, use mock data
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-        setProjects(mockProjects.slice(0, limit));
+        const response = await fetch('/api/projects/discovery');
+        if (!response.ok) throw new Error('Failed to load discovery feed');
+        const data = await response.json();
+        setProjects((data.projects || []).slice(0, limit));
       } catch (err) {
         setError('Failed to load trending projects');
       } finally {
@@ -254,15 +177,13 @@ export function TrendingAlpha({ limit = 6, showViewAll = true }: TrendingAlphaPr
 
   return (
     <section className="w-full max-w-[1200px] mx-auto px-4 py-12">
-      {/* Header */}
       <div className="text-center mb-10">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
           Trending Alpha 🔥
         </h2>
-        <p className="text-gray-400">Top opportunities from the community</p>
+        <p className="text-gray-400">Discovery-first projects from the LamboMoon radar</p>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading
           ? Array.from({ length: limit }).map((_, i) => <SkeletonCard key={i} />)
@@ -271,7 +192,6 @@ export function TrendingAlpha({ limit = 6, showViewAll = true }: TrendingAlphaPr
             ))}
       </div>
 
-      {/* View All Link */}
       {showViewAll && !loading && (
         <div className="text-center mt-10">
           <Link

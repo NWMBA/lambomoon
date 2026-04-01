@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { createBrowserClient } from "@supabase/ssr";
 import NewsTicker from "@/components/NewsTicker";
+import { TrendingAlpha } from "@/components/TrendingAlpha";
+import { BiggestMovers } from "@/components/BiggestMovers";
+import { type CryptoRow, isDiscoveryEligible, isMajorOrStable, matchesSearch, sortDiscovery } from "@/lib/discovery";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
-import { TrendingAlpha } from "@/components/TrendingAlpha";
-import { BiggestMovers } from "@/components/BiggestMovers";
 
 // Seed projects data with CoinGecko IDs - 30 projects launched late 2025/early 2026
-type Project = {
+type Project = CryptoRow & {
   id: string;
   name: string;
   symbol: string;
@@ -140,6 +141,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [boostedIds, setBoostedIds] = useState<string[]>([]);
+  const resultsRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -216,7 +218,7 @@ export default function Home() {
       try {
         const response = await fetch("/api/prices");
         if (!response.ok) throw new Error("Failed to fetch");
-        
+
         const { prices } = await response.json();
 
         let upvoteCounts: Record<string, number> = {};
@@ -232,32 +234,38 @@ export default function Home() {
         try {
           const { data: importedRows } = await supabase
             .from("cryptos")
-            .select("coingecko_id,name,symbol,category,notes,launch_date,price_change_24h,price_usd")
-            .not("coingecko_id", "is", null)
+            .select("coingecko_id,name,symbol,slug,status,source,category,ecosystem,tags,notes,launch_date,first_seen_at,confidence_score,price_change_24h,price_usd,market_cap,market_cap_rank")
             .limit(500);
 
           if (importedRows && importedRows.length > 0) {
-            baseProjects = importedRows.map((row: any) => ({
-              id: row.coingecko_id,
+            const mappedRows: Project[] = importedRows.map((row: any) => ({
+              ...row,
+              id: row.coingecko_id || row.slug,
               name: row.name,
               symbol: row.symbol || row.name?.slice(0, 4).toUpperCase() || "TKN",
-              category: row.category || "Uncategorized",
+              category: row.category || row.ecosystem || "Uncategorized",
               description: row.notes || "Indexed by LamboMoon from discovery sources.",
               change_24h: row.price_change_24h || 0,
-              launch_date: row.launch_date || new Date().toISOString(),
-              upvotes: upvoteCounts[row.coingecko_id] || 0,
+              launch_date: row.launch_date || row.first_seen_at || new Date().toISOString(),
+              upvotes: upvoteCounts[row.coingecko_id || row.slug] || 0,
               current_price: row.price_usd || prices[row.coingecko_id]?.usd || 0,
             }));
+
+            const discoveryProjects = sortDiscovery(
+              mappedRows.filter(isDiscoveryEligible).filter((project) => !isMajorOrStable(project))
+            ) as Project[];
+
+            baseProjects = discoveryProjects.length > 0 ? discoveryProjects : seedProjects;
           }
         } catch {}
-        
+
         const updated = baseProjects.map(project => ({
           ...project,
           current_price: project.current_price ?? prices[project.id]?.usd ?? 0,
           change_24h: prices[project.id]?.usd_24h_change ?? project.change_24h ?? 0,
           upvotes: upvoteCounts[project.id] ?? project.upvotes,
         }));
-        
+
         setProjects(updated);
       } catch (err) {
         console.error("Price fetch error:", err);
@@ -275,11 +283,9 @@ export default function Home() {
 
   const filteredProjects = projects
     .filter((project) => {
-      const matchesSearch = 
-        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesText = matchesSearch(project, searchQuery);
       const matchesCategory = selectedCategory === "All" || project.category.includes(selectedCategory);
-      return matchesSearch && matchesCategory;
+      return matchesText && matchesCategory;
     });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
@@ -311,6 +317,10 @@ export default function Home() {
   function sortIndicator(column: string) {
     if (sortBy !== column) return '↕';
     return sortDirection === 'asc' ? '↑' : '↓';
+  }
+
+  function submitSearch() {
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   return (
@@ -346,18 +356,29 @@ export default function Home() {
           
           {/* Search */}
           <div className="max-w-xl mx-auto mb-8">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search projects, symbols, or categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 text-lg bg-card border-border/50 focus:border-primary pl-12 pr-4"
-              />
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+            <form
+              className="flex gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                submitSearch();
+              }}
+            >
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  placeholder="Search projects, symbols, or categories..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-14 text-lg bg-card border-border/50 focus:border-primary pl-12 pr-4"
+                />
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <Button type="submit" size="lg" className="h-14 px-6 bg-primary hover:bg-primary/90">
+                Search
+              </Button>
+            </form>
           </div>
 
         </div>
@@ -442,7 +463,7 @@ export default function Home() {
       <BiggestMovers limit={6} />
 
       {/* Projects Grid */}
-      <section id="categories" className="py-16">
+      <section id="categories" ref={resultsRef} className="py-16">
         <div className="container mx-auto px-4">
           {/* Category Pills */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">

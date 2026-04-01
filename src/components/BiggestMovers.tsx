@@ -18,16 +18,6 @@ interface BiggestMoversProps {
   showViewAll?: boolean;
 }
 
-// Mock data for development - top 24h movers
-const mockMovers: Mover[] = [
-  { id: 'pepe', name: 'Pepe', symbol: 'PEPE', change_24h: 25.5, price: 0.0000012 },
-  { id: 'bonk', name: 'Bonk', symbol: 'BONK', change_24h: 15.2, price: 0.000025 },
-  { id: 'virtual-protocol', name: 'Virtual Protocol', symbol: 'VIRTUAL', change_24h: 12.8, price: 1.45 },
-  { id: 'ai16z', name: 'ai16z', symbol: 'AI16Z', change_24h: -8.5, price: 0.15 },
-  { id: 'pump', name: 'Pump', symbol: 'PUMP', change_24h: -12.3, price: 0.08 },
-  { id: 'war', name: 'WAR', symbol: 'WAR', change_24h: -18.7, price: 0.01 },
-];
-
 function formatPrice(price: number): string {
   if (price >= 1000) return `$${price.toLocaleString()}`;
   if (price >= 1) return `$${price.toFixed(2)}`;
@@ -101,15 +91,10 @@ export function BiggestMovers({ limit = 6, showViewAll = true }: BiggestMoversPr
   useEffect(() => {
     async function fetchMovers() {
       try {
-        // In production, this would fetch from Supabase/CoinGecko
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Sort by absolute change (biggest movers first - both up and down)
-        const sorted = [...mockMovers]
-          .sort((a, b) => Math.abs(b.change_24h) - Math.abs(a.change_24h))
-          .slice(0, limit);
-        
-        setMovers(sorted);
+        const response = await fetch('/api/projects/movers');
+        if (!response.ok) throw new Error('Failed to load movers');
+        const data = await response.json();
+        setMovers((data.projects || []).slice(0, limit));
       } catch (err) {
         setError('Failed to load biggest movers');
       } finally {
@@ -138,15 +123,13 @@ export function BiggestMovers({ limit = 6, showViewAll = true }: BiggestMoversPr
 
   return (
     <section className="w-full max-w-[1200px] mx-auto px-4 py-12">
-      {/* Header */}
       <div className="text-center mb-10">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
           Biggest Movers 📈
         </h2>
-        <p className="text-gray-400">Coins with the biggest 24h price changes</p>
+        <p className="text-gray-400">Listed market names with the biggest 24h moves</p>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading
           ? Array.from({ length: limit }).map((_, i) => <SkeletonCard key={i} />)
@@ -155,7 +138,6 @@ export function BiggestMovers({ limit = 6, showViewAll = true }: BiggestMoversPr
             ))}
       </div>
 
-      {/* View All Link */}
       {showViewAll && !loading && (
         <div className="text-center mt-10">
           <Link
